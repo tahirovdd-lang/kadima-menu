@@ -15,59 +15,35 @@
 --green:#1F4D3A;
 --meat:#8B1E1E;
 }
-
 *{box-sizing:border-box;}
 
 body{
 margin:0;
 font-family:'Montserrat',sans-serif;
-background:
-radial-gradient(circle at 20% 20%, rgba(212,160,23,.07) 2px, transparent 2px),
-radial-gradient(circle at 80% 80%, rgba(199,107,47,.07) 2px, transparent 2px),
-var(--bg);
-background-size:40px 40px;
+background:var(--bg);
 color:#2b2b2b;
 }
 
 /* HEADER */
 .header{
-padding:14px 12px;
+padding:16px 12px;
 background:linear-gradient(135deg,var(--terracotta),var(--gold));
 color:white;
 box-shadow:0 6px 18px rgba(120,70,20,.25);
 display:flex;
 align-items:center;
-gap:12px;
+justify-content:center;
+position:relative;
+text-align:center;
 }
-
 .header img{
-width:60px;
-height:60px;
-object-fit:contain;
+position:absolute;
+left:12px;
+width:80px;
 }
-
-.brand{
-display:flex;
-flex-direction:column;
-}
-
-.brand-title{
-font-family:'Lobster',cursive;
-font-size:32px;
-line-height:1;
-}
-
-.brand-sub{
-font-size:14px;
-font-weight:800;
-margin-top:2px;
-}
-
-.brand-phone a{
-color:white;
-text-decoration:none;
-font-size:14px;
-}
+.brand-title{font-family:'Lobster',cursive;font-size:36px;}
+.brand-sub{font-weight:800;font-size:15px;}
+.brand-phone a{color:white;text-decoration:none;font-size:14px;}
 
 /* BUTTONS */
 .btn{
@@ -83,14 +59,13 @@ background:linear-gradient(135deg,var(--terracotta),var(--gold));
 color:white;border:none;
 }
 
-.langs,.types,.categories,.payments{
+.types,.categories,.payments{
 display:flex;
 gap:10px;
 padding:12px;
 overflow-x:auto;
 }
 
-/* INPUTS */
 .input,textarea{
 margin:8px 12px;
 padding:14px;
@@ -119,30 +94,16 @@ border:1px solid #f0e6d6;
 }
 
 .img{
-height:80px;
-border-radius:14px;
+height:70px;
 display:flex;
 align-items:center;
 justify-content:center;
-background:#fff7ec;
 }
-.img img{
-max-width:55px;
-opacity:.85;
-}
+.img img{max-width:45px;opacity:.8;}
 
-.price{
-margin-top:6px;
-font-weight:800;
-color:var(--meat);
-}
+.price{font-weight:800;color:var(--meat);margin-top:6px;}
 
-.counter{
-display:flex;
-justify-content:center;
-gap:10px;
-margin-top:6px;
-}
+.counter{display:flex;justify-content:center;gap:10px;margin-top:6px;}
 .counter button{
 width:30px;height:30px;border-radius:50%;
 border:none;background:var(--green);color:white;font-size:16px;
@@ -175,7 +136,7 @@ font-weight:800;
 
 <div class="header">
   <img src="logo.png">
-  <div class="brand">
+  <div>
     <div class="brand-title">KADIMA</div>
     <div class="brand-sub">Signature taste</div>
     <div class="brand-phone">
@@ -191,7 +152,6 @@ font-weight:800;
 
 <input id="address" class="input" placeholder="📍 Адрес доставки">
 <input id="phone" class="input" placeholder="📞 Телефон">
-<textarea id="comment" class="input" placeholder="✍️ Комментарий к заказу"></textarea>
 
 <div class="categories" id="cats"></div>
 <div class="products" id="products"></div>
@@ -203,6 +163,8 @@ font-weight:800;
     <button class="btn active" onclick="setPayment('cash')" id="payCash">💵 Наличные</button>
     <button class="btn" onclick="setPayment('click')" id="payClick">💳 CLICK</button>
   </div>
+
+  <textarea id="comment" class="input" placeholder="✍️ Комментарий к заказу"></textarea>
 
   <button class="order-btn" onclick="sendOrder()">Оформить заказ</button>
 </div>
@@ -233,5 +195,49 @@ MENU[category].forEach(([n,p])=>{
 cart[n]=cart[n]||0;
 products.innerHTML+=`<div class="card">
 <div class="img"><img src="logo.png"></div>
+<div>${n}</div>
 <div class="price">${p} сум</div>
+<div class="counter">
+<button onclick="chg('${n}',-1)">−</button>
+<span id="c_${n}">${cart[n]}</span>
+<button onclick="chg('${n}',1)">+</button>
+</div></div>`;
+});
+}
 
+function chg(n,v){
+cart[n]=Math.max(0,(cart[n]||0)+v);
+document.getElementById('c_'+n).innerText=cart[n];
+updateTotal();
+}
+function updateTotal(){let s=0;for(let k in cart)s+=cart[k]*price(k);total.innerText=s;}
+function price(n){for(let c in MENU)for(let i of MENU[c])if(i[0]==n)return i[1];}
+
+function setType(t,b){
+type=t;
+document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');
+address.style.display=t==='pickup'?'none':'block';
+}
+
+function setPayment(p){
+payment=p;
+payCash.classList.toggle('active',p==='cash');
+payClick.classList.toggle('active',p==='click');
+}
+
+function sendOrder(){
+Telegram.WebApp.sendData(JSON.stringify({
+order:cart,total:total.innerText,payment,type,
+address:address.value,phone:phone.value,
+comment:comment.value
+}));
+Telegram.WebApp.close();
+}
+
+renderCats();
+renderProducts();
+</script>
+
+</body>
+</html>
