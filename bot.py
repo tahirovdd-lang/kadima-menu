@@ -57,18 +57,6 @@ POST_TEXT_3LANG = (
 )
 
 
-# ✅ ДИАГНОСТИКА: лог любого входящего сообщения (чтобы понять, прилетает ли web_app_data вообще)
-@dp.message()
-async def any_message_logger(message: types.Message):
-    try:
-        logging.info(
-            f"IN MSG: chat_id={message.chat.id} type={message.content_type} "
-            f"from={message.from_user.id if message.from_user else None}"
-        )
-    except Exception:
-        pass
-
-
 # ✅ Команда чтобы проверить реальный Telegram ID
 @dp.message(Command("id"))
 async def cmd_id(message: types.Message):
@@ -107,20 +95,18 @@ async def post_menu(message: types.Message):
         )
 
 
-# 🔥 ПРИЕМ ДАННЫХ ИЗ WEBAPP (ВАЖНО: этот хендлер должен срабатывать — иначе WebApp не отправляет данные)
+# 🔥 ПРИЕМ ДАННЫХ ИЗ WEBAPP
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # ✅ Сразу ответ клиенту, чтобы ты видел, что данные реально пришли в бот
-    # (если это сообщение НЕ приходит клиенту — значит web_app_data в бот не приходит)
+    # ✅ Быстрый ответ клиенту, чтобы видеть факт прихода данных
     try:
         await message.answer("✅ Данные заказа получены ботом. Обрабатываю…")
     except Exception:
         pass
 
-    data = {}
     try:
         data = json.loads(raw) if raw else {}
     except Exception:
@@ -130,12 +116,12 @@ async def webapp_data(message: types.Message):
     if not isinstance(order, dict):
         order = {}
 
-    total = data.get("total", "0") if isinstance(data, dict) else "0"
-    payment = data.get("payment", "не указано") if isinstance(data, dict) else "не указано"
-    order_type = data.get("type", "не указано") if isinstance(data, dict) else "не указано"
-    address = data.get("address", "—") if isinstance(data, dict) else "—"
-    phone = data.get("phone", "—") if isinstance(data, dict) else "—"
-    comment = data.get("comment", "—") if isinstance(data, dict) else "—"
+    total = str(data.get("total", "0")) if isinstance(data, dict) else "0"
+    payment = str(data.get("payment", "не указано")) if isinstance(data, dict) else "не указано"
+    order_type = str(data.get("type", "не указано")) if isinstance(data, dict) else "не указано"
+    address = str(data.get("address", "—")) if isinstance(data, dict) else "—"
+    phone = str(data.get("phone", "—")) if isinstance(data, dict) else "—"
+    comment = str(data.get("comment", "—")) if isinstance(data, dict) else "—"
 
     tg = data.get("tg", {}) if isinstance(data, dict) else {}
     if not isinstance(tg, dict):
@@ -174,7 +160,6 @@ async def webapp_data(message: types.Message):
         f"\n💬 <b>Комментарий:</b> {esc(comment)}"
     )
 
-    # ✅ отправляем админу, а если не получилось — покажем точную причину
     try:
         await bot.send_message(ADMIN_ID, admin_text)
         await message.answer("✅ <b>Ваш заказ принят!</b>\nС вами скоро свяжется оператор 📞")
@@ -183,13 +168,23 @@ async def webapp_data(message: types.Message):
         await message.answer(
             "✅ <b>Ваш заказ принят!</b>\n"
             "⚠️ Но админу не удалось отправить уведомление.\n"
-            "Причина:\n"
-            f"<code>{esc(e)}</code>\n\n"
-            "Чаще всего это значит:\n"
-            "— админ НЕ нажал /start у бота\n"
-            "— или ADMIN_ID указан неправильно\n"
-            "— или админ заблокировал бота"
+            f"Причина: <code>{esc(e)}</code>"
         )
+
+
+# ✅ ДИАГНОСТИКА (НЕ ПЕРЕХВАТЫВАЕТ КОМАНДЫ)
+@dp.message()
+async def any_message_logger(message: types.Message):
+    try:
+        # команды не трогаем
+        if message.text and message.text.startswith("/"):
+            return
+        logging.info(
+            f"IN MSG: chat_id={message.chat.id} type={message.content_type} "
+            f"from={message.from_user.id if message.from_user else None}"
+        )
+    except Exception:
+        pass
 
 
 async def main():
