@@ -3,45 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <title>KADIMA</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
-:root{--blue:#4a90e2;--green:#2e7d32;--bg:#f2f4f7;}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#eef2f7,#f7f9fc);color:#1c1c1e;}
+:root{
+--bg:#F8F3E9;
+--terracotta:#C76B2F;
+--gold:#D4A017;
+--green:#1F4D3A;
+--meat:#8B1E1E;
+}
 
-/* 🔥 НОВАЯ ШАПКА */
+body{
+margin:0;
+font-family:'Montserrat',sans-serif;
+background:
+radial-gradient(circle at 20% 20%, rgba(212,160,23,.07) 2px, transparent 2px),
+radial-gradient(circle at 80% 80%, rgba(199,107,47,.07) 2px, transparent 2px),
+var(--bg);
+background-size:40px 40px;
+color:#2b2b2b;
+}
+
+/* HEADER */
 .header{
-  padding:18px 10px;
-  background:linear-gradient(135deg,#4a90e2,#6fb1ff);
-  color:#fff;
-  text-align:center;
-  box-shadow:0 6px 20px rgba(0,0,0,.12);
+padding:22px 10px;
+text-align:center;
+background:linear-gradient(135deg,var(--terracotta),var(--gold));
+color:white;
+box-shadow:0 8px 24px rgba(120,70,20,.25);
 }
-.brand-title{
-  font-family:'Lobster',cursive;
-  font-size:40px;
-  letter-spacing:2px;
-}
-.brand-sub{font-size:15px;margin-top:4px;}
-.brand-phone{font-size:14px;margin-top:6px;opacity:.9;}
+.brand-title{font-family:'Lobster',cursive;font-size:42px;letter-spacing:2px;}
+.brand-sub{font-size:15px;margin-top:6px;}
+.brand-phone{font-size:14px;margin-top:6px;}
 
-.search-input{display:none;margin:10px;padding:14px;width:calc(100% - 20px);border-radius:18px;border:none;box-shadow:0 6px 20px rgba(0,0,0,.08);}
-.langs,.types,.categories,.payments{display:flex;gap:10px;padding:10px;overflow-x:auto;}
-.btn{padding:10px 18px;border-radius:22px;background:#fff;border:1px solid #e1e5ea;font-size:14px;font-weight:600;}
-.btn.active{background:linear-gradient(135deg,#4a90e2,#6fb1ff);color:#fff;border:none;}
-.input,textarea{margin:10px;padding:14px;width:calc(100% - 20px);border-radius:18px;border:none;font-size:14px;background:#fff;}
+.btn{
+padding:10px 18px;
+border-radius:24px;
+background:#fffdf9;
+border:1px solid #f0e6d6;
+font-weight:700;
+transition:.2s;
+}
+.btn.active{background:linear-gradient(135deg,var(--terracotta),var(--gold));color:white;border:none;}
+.btn:active{transform:scale(.92);}
+
+.langs,.types,.categories,.payments{display:flex;gap:10px;padding:12px;overflow-x:auto;}
+
+.input,textarea{
+margin:10px;
+padding:14px;
+width:calc(100% - 20px);
+border-radius:20px;
+border:1px solid #e6dac6;
+background:#fffdf9;
+}
+
 .products{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:12px;}
-.card{background:#fff;border-radius:20px;padding:12px;text-align:center;box-shadow:0 10px 24px rgba(0,0,0,.08);}
-.img{height:110px;border-radius:16px;background:#f0f2f5;overflow:hidden;}
+.card{
+border-radius:24px;
+background:#fffdf9;
+box-shadow:0 10px 22px rgba(120,70,20,.15);
+padding:12px;
+text-align:center;
+border:1px solid #f0e6d6;
+transition:.25s;
+}
+.card.added{animation:pop .3s ease;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+.img{height:110px;border-radius:16px;overflow:hidden;}
 .img img{width:100%;height:100%;object-fit:cover;}
-.price{margin-top:8px;font-weight:800;color:var(--green);}
-.counter{display:flex;justify-content:center;gap:12px;margin-top:8px;}
-.counter button{width:32px;height:32px;border-radius:50%;border:none;font-size:18px;}
-.cart{background:#fff;margin:12px;padding:16px;border-radius:22px;}
-.order-btn{width:100%;padding:16px;margin-top:14px;border:none;border-radius:20px;background:linear-gradient(135deg,#4a90e2,#6fb1ff);color:#fff;font-size:16px;font-weight:800;}
+
+.price{margin-top:8px;font-weight:800;color:var(--meat);font-size:16px;}
+
+.counter{display:flex;justify-content:center;gap:10px;margin-top:8px;}
+.counter button{
+width:34px;height:34px;border-radius:50%;
+border:none;background:var(--green);color:white;font-size:18px;
+transition:.15s;
+}
+.counter button:active{transform:scale(.85);}
+
+.cart{
+background:#fffdf9;
+margin:12px;
+padding:16px;
+border-radius:24px;
+border:1px solid #f0e6d6;
+}
+.order-btn{
+width:100%;
+padding:16px;
+margin-top:14px;
+border:none;
+border-radius:22px;
+background:linear-gradient(135deg,var(--green),#2e7d32);
+color:white;
+font-size:17px;
+font-weight:800;
+letter-spacing:1px;
+transition:.2s;
+}
+.order-btn:active{transform:scale(.96);}
+
+/* POPUP */
+.popup{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.4);
+display:flex;
+align-items:center;
+justify-content:center;
+opacity:0;
+pointer-events:none;
+transition:.3s;
+}
+.popup.show{opacity:1;pointer-events:auto;}
+.popup-box{
+background:white;
+padding:26px;
+border-radius:20px;
+text-align:center;
+animation:pop .3s ease;
+}
 </style>
 </head>
 
@@ -53,103 +140,64 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans
   <div class="brand-phone">+998 90 538 99 99</div>
 </div>
 
-<input id="search" class="search-input">
-
-<div class="langs">
-  <button class="btn active" onclick="setLang('ru',this)">RU</button>
-  <button class="btn" onclick="setLang('uz',this)">UZ</button>
-  <button class="btn" onclick="setLang('en',this)">EN</button>
-</div>
-
-<div class="types">
-  <button class="btn active" onclick="setType('delivery',this)" id="btnDelivery"></button>
-  <button class="btn" onclick="setType('pickup',this)" id="btnPickup"></button>
-</div>
-
-<input id="address" class="input">
-<input id="phone" class="input">
-
 <div class="categories" id="cats"></div>
 <div class="products" id="products"></div>
 
 <div class="cart">
-  <b id="cartTitle"></b>: <span id="total">0</span> сум
-  <textarea id="comment" rows="3"></textarea>
+  <b>🛒 Корзина:</b> <span id="total">0</span> сум
+  <button class="order-btn" onclick="sendOrder()">Оформить заказ</button>
+</div>
 
-  <div class="payments">
-    <button class="btn active" onclick="setPayment('cash')" id="payCash">💵 Наличные</button>
-    <button class="btn" onclick="setPayment('click')" id="payClick">💳 CLICK</button>
+<div class="popup" id="popup">
+  <div class="popup-box">
+    <h2>✅ Заказ принят!</h2>
+    <p>Скоро с вами свяжутся</p>
   </div>
-
-  <button class="order-btn" onclick="sendOrder()" id="orderBtn"></button>
 </div>
 
 <script>
 Telegram.WebApp.ready();
 
-let lang='ru',category='salads',type='delivery',cart={},searchValue='',payment='cash';
+const MENU={salads:[['Свежий',30000,'images/svejiy.jpg']],kebab:[['Молотый',28000,'images/molotiy.jpg']]};
+let category='salads',cart={};
 
-const TEXT={
-ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'💬 Комментарий',search:'🔎 Поиск'},
-uz:{delivery:'🚚 Yetkazib berish',pickup:'🏃 Olib ketish',address:'📍 Manzil',phone:'📞 Telefon',cart:'🛒 Savat',order:'Buyurtma berish',comment:'💬 Izoh',search:'🔎 Qidirish'},
-en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'💬 Comment',search:'🔎 Search'}
-};
-
-const CATS={
-ru:{salads:'🥗 Салаты',kebab:'🔥 Шашлык',drinks:'🥤 Напитки',bread:'🥖 Хлеб'},
-uz:{salads:'🥗 Salatlar',kebab:'🔥 Shashlik',drinks:'🥤 Ichimliklar',bread:'🥖 Non'},
-en:{salads:'🥗 Salads',kebab:'🔥 Kebab',drinks:'🥤 Drinks',bread:'🥖 Bread'}
-};
-
-const MENU={
-salads:[['Свежий',30000,'images/svejiy.jpg'],['Цезарь',35000,'images/cezar.jpg']],
-kebab:[['Молотый',28000,'images/molotiy.jpg']],
-drinks:[['Coca Cola 1L',14000,'images/coca_cola_1l.jpg']],
-bread:[['Лепешка',10000,'images/lepyoshka.jpg']]
-};
-
+function renderCats(){cats.innerHTML='<button class="btn active">🥗 Салаты</button><button class="btn">🔥 Шашлык</button>';}
 function renderProducts(){
 products.innerHTML='';
 MENU[category].forEach(([n,p,img])=>{
 cart[n]=cart[n]||0;
-products.innerHTML+=`<div class="card"><div class="img"><img src="${img}"></div>
-<div class="price">${p} сум</div><div>${n}</div>
-<div class="counter"><button onclick="chg('${n}',-1)">−</button>
+products.innerHTML+=`<div class="card" id="card_${n}">
+<div class="img"><img src="${img}"></div>
+<div class="price">${p} сум</div>
+<div>${n}</div>
+<div class="counter">
+<button onclick="chg('${n}',-1)">−</button>
 <span id="c_${n}">${cart[n]}</span>
-<button onclick="chg('${n}',1)">+</button></div></div>`;
+<button onclick="chg('${n}',1)">+</button>
+</div></div>`;
 });
-updateTotal();
 }
 
-function chg(n,v){cart[n]=Math.max(0,(cart[n]||0)+v);document.getElementById('c_'+n).innerText=cart[n];updateTotal();}
+function chg(n,v){
+cart[n]=Math.max(0,(cart[n]||0)+v);
+document.getElementById('c_'+n).innerText=cart[n];
+document.getElementById('card_'+n).classList.add('added');
+setTimeout(()=>document.getElementById('card_'+n).classList.remove('added'),300);
+updateTotal();
+}
 function updateTotal(){let s=0;for(let k in cart)s+=cart[k]*price(k);total.innerText=s;}
 function price(n){for(let c in MENU)for(let i of MENU[c])if(i[0]==n)return i[1];}
 
-function renderCats(){cats.innerHTML='';for(let k in CATS[lang])cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k]}</button>`;}
-
-function setLang(l,b){lang=l;document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyLang();}
-function setType(t,b){type=t;document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');address.style.display=t==='pickup'?'none':'block';}
-function setPayment(p){payment=p;payCash.classList.toggle('active',p==='cash');payClick.classList.toggle('active',p==='click');}
-
-function applyLang(){
-btnDelivery.innerText=TEXT[lang].delivery;
-btnPickup.innerText=TEXT[lang].pickup;
-address.placeholder=TEXT[lang].address;
-phone.placeholder=TEXT[lang].phone;
-cartTitle.innerText=TEXT[lang].cart;
-orderBtn.innerText=TEXT[lang].order;
-comment.placeholder=TEXT[lang].comment;
-renderCats();renderProducts();
-}
-
 function sendOrder(){
-const order={};for(let k in cart) if(cart[k]>0) order[k]=cart[k];
-Telegram.WebApp.sendData(JSON.stringify({order,total:total.innerText,payment,type,address:address.value,phone:phone.value,comment:comment.value}));
+popup.classList.add('show');
+setTimeout(()=>{
+Telegram.WebApp.sendData(JSON.stringify({order:cart,total:total.innerText}));
 Telegram.WebApp.close();
+},1200);
 }
 
-applyLang();
+renderCats();
+renderProducts();
 </script>
-
 </body>
 </html>
