@@ -9,12 +9,16 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.client.default import DefaultBotProperties
 
+from aiohttp import web  # ✅ добавили мини-сервер для BotHost
+
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("TOKEN")
 ADMIN_ID = 6013591658
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 CHANNEL_ID = "@Kadimasignaturetaste"
+
+PORT = int(os.getenv("PORT", "3000"))  # ✅ BotHost даёт PORT=3000
 
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN в BotHost.")
@@ -57,11 +61,13 @@ POST_TEXT_3LANG = (
 )
 
 
+# ✅ Проверка, что бот жив
 @dp.message(Command("health"))
 async def health(message: types.Message):
     await message.answer("✅ Бот живой и отвечает.")
 
 
+# ✅ Команда чтобы проверить реальный Telegram ID
 @dp.message(Command("id"))
 async def cmd_id(message: types.Message):
     await message.answer(
@@ -70,9 +76,9 @@ async def cmd_id(message: types.Message):
     )
 
 
+# ✅ Проверка: может ли бот писать админу
 @dp.message(Command("ping_admin"))
 async def ping_admin(message: types.Message):
-    # запускать только админом
     if message.from_user.id != ADMIN_ID:
         return await message.answer("⛔️ Нет доступа.")
 
@@ -113,12 +119,13 @@ async def post_menu(message: types.Message):
         )
 
 
+# 🔥 ПРИЕМ ДАННЫХ ИЗ WEBAPP
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # Быстрый ответ клиенту
+    # ✅ Быстрый ответ клиенту, чтобы видеть факт прихода данных
     try:
         await message.answer("✅ Данные заказа получены ботом. Обрабатываю…")
     except Exception:
@@ -129,18 +136,18 @@ async def webapp_data(message: types.Message):
     except Exception:
         data = {"_raw": raw}
 
-    order = data.get("order") if isinstance(data, dict) else {}
+    order = data.get("order") if isinstance(data, dict) else None
     if not isinstance(order, dict):
         order = {}
 
-    total = str(data.get("total", "0"))
-    payment = str(data.get("payment", "не указано"))
-    order_type = str(data.get("type", "не указано"))
-    address = str(data.get("address", "—"))
-    phone = str(data.get("phone", "—"))
-    comment = str(data.get("comment", "—"))
+    total = str(data.get("total", "0")) if isinstance(data, dict) else "0"
+    payment = str(data.get("payment", "не указано")) if isinstance(data, dict) else "не указано"
+    order_type = str(data.get("type", "не указано")) if isinstance(data, dict) else "не указано"
+    address = str(data.get("address", "—")) if isinstance(data, dict) else "—"
+    phone = str(data.get("phone", "—")) if isinstance(data, dict) else "—"
+    comment = str(data.get("comment", "—")) if isinstance(data, dict) else "—"
 
-    tg = data.get("tg", {})
+    tg = data.get("tg", {}) if isinstance(data, dict) else {}
     if not isinstance(tg, dict):
         tg = {}
     tg_id = tg.get("id", "")
@@ -148,11 +155,13 @@ async def webapp_data(message: types.Message):
     tg_first_name = tg.get("first_name", "")
 
     admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
-    admin_text += (
-        f"👤 <b>Клиент:</b> {esc(tg_first_name)}\n"
-        f"🆔 <b>ID:</b> {esc(tg_id)}\n"
-        f"🔗 <b>Username:</b> @{esc(tg_username) if tg_username else '—'}\n\n"
-    )
+
+    if tg_id or tg_username or tg_first_name:
+        admin_text += (
+            f"👤 <b>Клиент:</b> {esc(tg_first_name)}\n"
+            f"🆔 <b>ID:</b> {esc(tg_id)}\n"
+            f"🔗 <b>Username:</b> @{esc(tg_username) if tg_username else '—'}\n\n"
+        )
 
     if not order:
         admin_text += "⚠️ Корзина пустая\n"
@@ -187,9 +196,34 @@ async def webapp_data(message: types.Message):
         )
 
 
+# ✅ Мини HTTP сервер для BotHost (чтобы не было SIGTERM)
+async def start_http_server():
+    async def ok(request):
+        return web.Response(text="OK")
+
+    app = web.Application()
+    app.router.add_get("/", ok)
+    app.router.add_get("/health", ok)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, host="0.0.0.0", port=PORT)
+    await site.start()
+
+    logging.info(f"HTTP server started on 0.0.0.0:{PORT}")
+    # держим задачу живой
+    while True:
+        await asyncio.sleep(3600)
+
+
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+
+    # ✅ запускаем сервер и polling параллельно
+    await asyncio.gather(
+        start_http_server(),
+        dp.start_polling(bot)
+    )
 
 
 if __name__ == "__main__":
