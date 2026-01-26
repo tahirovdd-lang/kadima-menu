@@ -5,16 +5,29 @@
 <title>KADIMA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 
 <style>
 :root{--blue:#4a90e2;--green:#2e7d32;--bg:#f2f4f7;}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#eef2f7,#f7f9fc);color:#1c1c1e;}
-.header{padding:16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#4a90e2,#6fb1ff);color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.12);}
-.logo-wrap{display:flex;align-items:center;gap:12px;}
-.header img{max-width:110px;}
-.header-title{font-family:'Montserrat',sans-serif;font-size:32px;font-weight:900;}
-.search-btn{width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:18px;}
+
+/* 🔥 НОВАЯ ШАПКА */
+.header{
+  padding:18px 10px;
+  background:linear-gradient(135deg,#4a90e2,#6fb1ff);
+  color:#fff;
+  text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.12);
+}
+.brand-title{
+  font-family:'Lobster',cursive;
+  font-size:40px;
+  letter-spacing:2px;
+}
+.brand-sub{font-size:15px;margin-top:4px;}
+.brand-phone{font-size:14px;margin-top:6px;opacity:.9;}
+
 .search-input{display:none;margin:10px;padding:14px;width:calc(100% - 20px);border-radius:18px;border:none;box-shadow:0 6px 20px rgba(0,0,0,.08);}
 .langs,.types,.categories,.payments{display:flex;gap:10px;padding:10px;overflow-x:auto;}
 .btn{padding:10px 18px;border-radius:22px;background:#fff;border:1px solid #e1e5ea;font-size:14px;font-weight:600;}
@@ -35,11 +48,9 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans
 <body>
 
 <div class="header">
-  <div class="logo-wrap">
-    <img src="logo.png">
-    <div class="header-title">KADIMA</div>
-  </div>
-  <button class="search-btn" onclick="toggleSearch()">🔍</button>
+  <div class="brand-title">KADIMA</div>
+  <div class="brand-sub">Signature taste</div>
+  <div class="brand-phone">+998 90 538 99 99</div>
 </div>
 
 <input id="search" class="search-input">
@@ -99,7 +110,7 @@ bread:[['Лепешка',10000,'images/lepyoshka.jpg']]
 
 function renderProducts(){
 products.innerHTML='';
-MENU[category].filter(i=>i[0].toLowerCase().includes(searchValue)).forEach(([n,p,img])=>{
+MENU[category].forEach(([n,p,img])=>{
 cart[n]=cart[n]||0;
 products.innerHTML+=`<div class="card"><div class="img"><img src="${img}"></div>
 <div class="price">${p} сум</div><div>${n}</div>
@@ -119,8 +130,6 @@ function renderCats(){cats.innerHTML='';for(let k in CATS[lang])cats.innerHTML+=
 function setLang(l,b){lang=l;document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyLang();}
 function setType(t,b){type=t;document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');address.style.display=t==='pickup'?'none':'block';}
 function setPayment(p){payment=p;payCash.classList.toggle('active',p==='cash');payClick.classList.toggle('active',p==='click');}
-function toggleSearch(){search.style.display=search.style.display==='block'?'none':'block';}
-search.oninput=e=>{searchValue=e.target.value.toLowerCase();renderProducts();};
 
 function applyLang(){
 btnDelivery.innerText=TEXT[lang].delivery;
@@ -130,38 +139,17 @@ phone.placeholder=TEXT[lang].phone;
 cartTitle.innerText=TEXT[lang].cart;
 orderBtn.innerText=TEXT[lang].order;
 comment.placeholder=TEXT[lang].comment;
-search.placeholder=TEXT[lang].search;
 renderCats();renderProducts();
 }
 
 function sendOrder(){
-  const order = {};
-  for(let k in cart) if(cart[k] > 0) order[k] = cart[k];
-
-  if(Object.keys(order).length === 0){
-    alert("Добавьте товары в корзину");
-    return;
-  }
-
-  if(type === 'delivery' && address.value.trim() === ''){
-    alert("Введите адрес доставки");
-    return;
-  }
-
-  if(phone.value.trim() === ''){
-    alert("Введите номер телефона");
-    return;
-  }
-
-  Telegram.WebApp.sendData(JSON.stringify({
-    order: order,
-    total: total.innerText,
-    payment: payment,
-    type: type,
-    address: address.value,
-    phone: phone.value,
-    comment: comment.value
-  }));
-
-  Telegram.WebApp.close();
+const order={};for(let k in cart) if(cart[k]>0) order[k]=cart[k];
+Telegram.WebApp.sendData(JSON.stringify({order,total:total.innerText,payment,type,address:address.value,phone:phone.value,comment:comment.value}));
+Telegram.WebApp.close();
 }
+
+applyLang();
+</script>
+
+</body>
+</html>
