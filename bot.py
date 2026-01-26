@@ -12,7 +12,6 @@ from aiogram.client.default import DefaultBotProperties
 logging.basicConfig(level=logging.INFO)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-
 ADMIN_ID = 6013591658
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 CHANNEL_ID = "@Kadimasignaturetaste"
@@ -20,13 +19,11 @@ CHANNEL_ID = "@Kadimasignaturetaste"
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN в BotHost.")
 
-
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
 def esc(x) -> str:
-    """Безопасно экранируем HTML, чтобы Telegram не ломал сообщение."""
     return html.escape(str(x)) if x is not None else "—"
 
 
@@ -60,6 +57,27 @@ POST_TEXT_3LANG = (
 )
 
 
+# ✅ ДИАГНОСТИКА: лог любого входящего сообщения (чтобы понять, прилетает ли web_app_data вообще)
+@dp.message()
+async def any_message_logger(message: types.Message):
+    try:
+        logging.info(
+            f"IN MSG: chat_id={message.chat.id} type={message.content_type} "
+            f"from={message.from_user.id if message.from_user else None}"
+        )
+    except Exception:
+        pass
+
+
+# ✅ Команда чтобы проверить реальный Telegram ID
+@dp.message(Command("id"))
+async def cmd_id(message: types.Message):
+    await message.answer(
+        f"🆔 Ваш Telegram ID: <code>{message.from_user.id}</code>\n"
+        f"chat_id: <code>{message.chat.id}</code>"
+    )
+
+
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(START_TEXT_3LANG, reply_markup=menu_kb())
@@ -89,19 +107,25 @@ async def post_menu(message: types.Message):
         )
 
 
+# 🔥 ПРИЕМ ДАННЫХ ИЗ WEBAPP (ВАЖНО: этот хендлер должен срабатывать — иначе WebApp не отправляет данные)
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # 1) Парсим JSON безопасно
+    # ✅ Сразу ответ клиенту, чтобы ты видел, что данные реально пришли в бот
+    # (если это сообщение НЕ приходит клиенту — значит web_app_data в бот не приходит)
+    try:
+        await message.answer("✅ Данные заказа получены ботом. Обрабатываю…")
+    except Exception:
+        pass
+
     data = {}
     try:
         data = json.loads(raw) if raw else {}
     except Exception:
         data = {"_raw": raw}
 
-    # 2) Вытаскиваем безопасно поля
     order = data.get("order") if isinstance(data, dict) else None
     if not isinstance(order, dict):
         order = {}
@@ -113,7 +137,6 @@ async def webapp_data(message: types.Message):
     phone = data.get("phone", "—") if isinstance(data, dict) else "—"
     comment = data.get("comment", "—") if isinstance(data, dict) else "—"
 
-    # tg-данные клиента (приходят из WebApp, у тебя они отправляются)
     tg = data.get("tg", {}) if isinstance(data, dict) else {}
     if not isinstance(tg, dict):
         tg = {}
@@ -121,10 +144,8 @@ async def webapp_data(message: types.Message):
     tg_username = tg.get("username", "")
     tg_first_name = tg.get("first_name", "")
 
-    # 3) Сообщение админу (ВАЖНО: всё экранируем)
     admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
 
-    # кто заказал
     if tg_id or tg_username or tg_first_name:
         admin_text += (
             f"👤 <b>Клиент:</b> {esc(tg_first_name)}\n"
@@ -153,40 +174,22 @@ async def webapp_data(message: types.Message):
         f"\n💬 <b>Комментарий:</b> {esc(comment)}"
     )
 
-    if isinstance(data, dict) and "_raw" in data:
-        admin_text += f"\n\n🧩 <b>RAW:</b>\n<code>{esc(data['_raw'])}</code>"
-
-    # 4) Отправка админу (и покажем ошибку пользователю, если не отправилось)
-    admin_sent = False
-    admin_error = ""
-
+    # ✅ отправляем админу, а если не получилось — покажем точную причину
     try:
         await bot.send_message(ADMIN_ID, admin_text)
-        admin_sent = True
+        await message.answer("✅ <b>Ваш заказ принят!</b>\nС вами скоро свяжется оператор 📞")
     except Exception as e:
-        admin_error = str(e)
         logging.exception("ADMIN SEND ERROR")
-
-    # 5) Ответ клиенту
-    try:
-        if admin_sent:
-            await message.answer(
-                "✅ <b>Ваш заказ принят!</b>\n"
-                "С вами скоро свяжется оператор 📞"
-            )
-        else:
-            await message.answer(
-                "✅ <b>Ваш заказ принят!</b>\n"
-                "⚠️ Но оператору не удалось отправить уведомление автоматически.\n"
-                "Причина (для диагностики):\n"
-                f"<code>{esc(admin_error) if admin_error else 'неизвестно'}</code>\n\n"
-                "Проверь у админа:\n"
-                "1) админ нажал /start у бота\n"
-                "2) админ не блокировал бота\n"
-                "3) в заказе/адресе нет спецсимволов, но мы уже экранируем — теперь должно работать"
-            )
-    except Exception:
-        logging.exception("CLIENT ANSWER ERROR")
+        await message.answer(
+            "✅ <b>Ваш заказ принят!</b>\n"
+            "⚠️ Но админу не удалось отправить уведомление.\n"
+            "Причина:\n"
+            f"<code>{esc(e)}</code>\n\n"
+            "Чаще всего это значит:\n"
+            "— админ НЕ нажал /start у бота\n"
+            "— или ADMIN_ID указан неправильно\n"
+            "— или админ заблокировал бота"
+        )
 
 
 async def main():
