@@ -4,8 +4,8 @@ import json
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = "8525626062:AAGqnee7mzlP9OjrEOYYirzArf2MYgIK95Q"
-WEBAPP_URL = "https://tahirovdd-lang.github.io/radj-shashlik-bot/"
+BOT_TOKEN = "8585841930:AAFuPSIdTLnVFJFxJMWnapIZoWWyGvhNFTs"
+WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(bot)
@@ -54,3 +54,4 @@ if __name__ == "__main__":
         skip_updates=True,
         on_startup=lambda _: bot.delete_webhook(drop_pending_updates=True)
     )
+
