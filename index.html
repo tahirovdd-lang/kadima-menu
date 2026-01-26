@@ -9,15 +9,35 @@
 
 <style>
 :root{
---bg:#F8F3E9;
---terracotta:#C76B2F;
---gold:#D4A017;
---green:#1F4D3A;
---meat:#8B1E1E;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{margin:0;font-family:'Montserrat',sans-serif;background:var(--bg);color:#2b2b2b;}
+  --bg:#F8F3E9;
+  --terracotta:#C76B2F;
+  --gold:#D4A017;
+  --green:#1F4D3A;
+  --meat:#8B1E1E;
 
+  /* премиум-обводки */
+  --stroke: rgba(199,107,47,.35);
+  --stroke-strong: rgba(199,107,47,.50);
+  --inner: rgba(255,255,255,.70);
+  --shadow: rgba(120,70,20,.10);
+  --shadow-strong: rgba(120,70,20,.18);
+
+  /* ✅ единые радиусы */
+  --r-lg:24px;
+  --r-md:22px;
+  --r-pill:28px;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  margin:0;
+  font-family:'Montserrat',sans-serif;
+  background:var(--bg);
+  color:#2b2b2b;
+  padding-bottom:88px; /* ✅ место под sticky панель */
+}
+
+/* ✅ Header */
 .header{
   padding:16px 12px 26px;
   background:linear-gradient(135deg,var(--terracotta),var(--gold));
@@ -46,113 +66,297 @@ body{margin:0;font-family:'Montserrat',sans-serif;background:var(--bg);color:#2b
   pointer-events:auto;
 }
 
-/* ✅ Контур у кнопки поиска + кликабельность */
+/* ✅ Поиск кнопка */
 .search-btn{
   position:absolute;
   right:14px;
   bottom:10px;
-  width:34px;
-  height:34px;
+  width:36px;
+  height:36px;
   border-radius:50%;
-  background:white;
-  color:#333;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:16px;
   font-weight:700;
-  border:2px solid #000;
   cursor:pointer;
   z-index:25;
+
+  color:#333;
+  background:#fffdf9;
+  border:1px solid var(--stroke);
+  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
+  transition:.15s;
+}
+.search-btn:active{transform:scale(.97);}
+
+/* ✅ Глобальные блоки */
+.langs,.types,.payments{
+  display:flex;
+  gap:12px;
+  padding:12px;
+  justify-content:center;
 }
 
-.langs,.types,.payments{display:flex;gap:12px;padding:12px;justify-content:center;}
-
-/* ✅ Контур у всех кнопок */
+/* ✅ Кнопки премиум */
 .btn{
   padding:12px 20px;
-  border-radius:28px;
-  background:#fffdf9;
-  border:2px solid #000;
+  border-radius:var(--r-pill);
   font-weight:700;
   min-width:120px;
   text-align:center;
   cursor:pointer;
+  transition:.15s;
+
+  border:1px solid var(--stroke);
+  background:#fffdf9;
+  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
 }
+.btn:active{transform:scale(.98);}
 .btn.active{
   background:linear-gradient(135deg,var(--terracotta),var(--gold));
   color:white;
-  border:2px solid #000;
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.45), 0 8px 18px var(--shadow-strong);
 }
 
+/* ✅ Инпуты премиум */
 .input{
   margin:8px auto;
   display:block;
   padding:14px;
   width:85%;
-  border-radius:20px;
-  border:2px solid #000;
-  background:#fffdf9;
+  border-radius:var(--r-md);
   font-size:15px;
-}
 
-.categories{display:flex;gap:12px;padding:14px;overflow-x:auto;}
-.products{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px;}
-
-/* ✅ Контур карточек */
-.card{
-  border-radius:20px;
+  border:1px solid var(--stroke);
   background:#fffdf9;
-  box-shadow:0 8px 18px rgba(120,70,20,.15);
-  padding:10px;
-  text-align:center;
-  border:2px solid #000;
+  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
+  outline:none;
+  transition:.15s;
+}
+.input:focus{
+  border-color: var(--stroke-strong);
+  box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);
 }
 
-.img{height:70px;display:flex;align-items:center;justify-content:center;}
-.img img{max-width:58px;opacity:.9;}
-.price{font-weight:800;color:var(--meat);margin-top:6px;}
-.counter{display:flex;justify-content:center;gap:10px;margin-top:6px;}
+.categories{
+  display:flex;
+  gap:12px;
+  padding:14px;
+  overflow-x:auto;
+  scroll-behavior:smooth;
+}
 
-/* ✅ Контур у +/- */
+/* ✅ больше воздуха */
+.products{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+  padding:12px;
+}
+
+/* ✅ Карточки премиум */
+.card{
+  border-radius:var(--r-lg);
+  padding:12px;
+  text-align:center;
+  background:#fffdf9;
+  border:1px solid var(--stroke);
+  box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
+  transition:.15s;
+}
+.card:active{transform:scale(.99);}
+
+.img{height:76px;display:flex;align-items:center;justify-content:center;}
+.img img{max-width:62px;opacity:.9;}
+
+.price{
+  font-weight:800;
+  color:var(--meat);
+  margin-top:6px;
+}
+.price small{
+  font-weight:700;
+  opacity:.75;
+  margin-left:4px;
+}
+
+.counter{display:flex;justify-content:center;gap:10px;margin-top:8px;align-items:center;}
 .counter button{
-  width:30px;
-  height:30px;
+  width:32px;
+  height:32px;
   border-radius:50%;
-  border:2px solid #000;
+  cursor:pointer;
+
+  border:1px solid rgba(255,255,255,.6);
   background:var(--green);
   color:white;
   font-size:16px;
-  cursor:pointer;
+  box-shadow:0 6px 14px var(--shadow);
+  transition:.15s;
 }
+.counter button:active{transform:scale(.96);}
 
 .cart{
   background:#fffdf9;
   margin:12px;
   padding:16px;
-  border-radius:20px;
-  border:2px solid #000;
+  border-radius:var(--r-lg);
+  border:1px solid var(--stroke);
+  box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
 }
 
 textarea.input{height:90px;}
 
-/* ✅ Контур у кнопки заказа */
 .order-btn{
   width:100%;
   padding:18px;
   margin-top:14px;
-  border:2px solid #000;
-  border-radius:20px;
-  background:linear-gradient(135deg,var(--green),#2e7d32);
+  border-radius:var(--r-lg);
+  cursor:pointer;
   color:white;
   font-size:17px;
   font-weight:800;
-  cursor:pointer;
+
+  border:1px solid rgba(255,255,255,.55);
+  background:linear-gradient(135deg,var(--green),#2e7d32);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 10px 22px rgba(31,77,58,.18);
+  transition:.15s;
 }
+.order-btn:active{transform:scale(.99);}
 
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
 .popup.show{opacity:1;pointer-events:auto;}
-.popup-box{background:white;padding:26px;border-radius:20px;text-align:center;font-weight:700;border:2px solid #000;}
+.popup-box{
+  background:white;
+  padding:26px;
+  border-radius:var(--r-lg);
+  text-align:center;
+  font-weight:700;
+  border:1px solid var(--stroke);
+  box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px rgba(0,0,0,.10);
+}
+
+/* ✅ Поиск: поле + кнопка очистки */
+.search-wrap{
+  width:85%;
+  margin:8px auto;
+  position:relative;
+  display:none;
+}
+.search-wrap.show{display:block;}
+.search-wrap input{
+  width:100%;
+  margin:0;
+  padding-right:44px;
+}
+.search-clear{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+
+  border:1px solid var(--stroke);
+  background:#fffdf9;
+  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
+  transition:.15s;
+}
+.search-clear:active{transform:translateY(-50%) scale(.96);}
+
+.search-title{
+  width:85%;
+  margin:10px auto 0;
+  font-weight:800;
+  opacity:.9;
+  display:none;
+}
+.search-title.show{display:block;}
+
+/* ✅ подсветка найденного */
+mark{
+  background:rgba(212,160,23,.25);
+  padding:0 .12em;
+  border-radius:6px;
+}
+
+/* ✅ Быстрые фильтры */
+.quick-filters{
+  display:flex;
+  gap:10px;
+  padding:0 12px 10px;
+  overflow-x:auto;
+}
+.qbtn{
+  border:1px solid var(--stroke);
+  background:#fffdf9;
+  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.15s;
+}
+.qbtn:active{transform:scale(.98);}
+
+/* ✅ Sticky checkout */
+.sticky-checkout{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  padding:10px 12px;
+  background:rgba(248,243,233,.88);
+  backdrop-filter: blur(10px);
+  z-index:999;
+  border-top:1px solid rgba(199,107,47,.25);
+}
+.sticky-inner{
+  max-width:520px;
+  margin:0 auto;
+  border-radius:18px;
+  padding:10px 12px;
+  background:#fffdf9;
+  border:1px solid var(--stroke);
+  box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px rgba(120,70,20,.12);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.sticky-sum{
+  font-weight:900;
+  line-height:1.1;
+}
+.sticky-sum small{display:block; font-weight:800; opacity:.75; margin-top:2px;}
+.sticky-btn{
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.55);
+  background:linear-gradient(135deg,var(--green),#2e7d32);
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.20), 0 10px 22px rgba(31,77,58,.18);
+  transition:.15s;
+  white-space:nowrap;
+}
+.sticky-btn:active{transform:scale(.99);}
+
+/* ✅ Hover только для устройств с hover */
+@media (hover:hover){
+  .btn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
+  .card:hover{transform:translateY(-2px); box-shadow: inset 0 0 0 2px var(--inner), 0 12px 26px rgba(120,70,20,.16);}
+  .qbtn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
+  .search-btn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
+  .sticky-btn:hover{box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 14px 28px rgba(31,77,58,.22);}
+}
 </style>
 </head>
 
@@ -167,18 +371,23 @@ textarea.input{height:90px;}
       <a href="tel:+998905389999">+998 90 538 99 99</a>
     </div>
   </div>
-  <!-- ✅ Поиск кликабельный -->
   <div class="search-btn" onclick="toggleSearch()">🔍</div>
 </div>
 
-<!-- ✅ Поле поиска (скрыто, открывается кнопкой 🔍) -->
-<input id="searchInput" class="input" style="display:none" placeholder="Поиск блюда..." oninput="searchProducts()">
+<div class="search-title" id="searchTitle">Результаты поиска</div>
+<div class="search-wrap" id="searchWrap">
+  <input id="searchInput" class="input" placeholder="Поиск блюда..." oninput="searchProducts()">
+  <div class="search-clear" onclick="clearSearch()" title="Очистить">✖</div>
+</div>
 
 <div class="langs">
   <button class="btn active" onclick="setLang('ru',this)">RU</button>
   <button class="btn" onclick="setLang('uz',this)">UZ</button>
   <button class="btn" onclick="setLang('en',this)">EN</button>
 </div>
+
+<!-- ✅ Быстрые фильтры -->
+<div class="quick-filters" id="quickFilters"></div>
 
 <div class="types">
   <button class="btn active" id="btnDelivery" onclick="setType('delivery',this)"></button>
@@ -203,6 +412,16 @@ textarea.input{height:90px;}
 
 <div class="popup" id="popup"><div class="popup-box">✅ Заказ принят!</div></div>
 
+<!-- ✅ Sticky checkout панель -->
+<div class="sticky-checkout">
+  <div class="sticky-inner">
+    <div class="sticky-sum">
+      <span id="stickyTotal">0</span> <small>сум</small>
+    </div>
+    <button class="sticky-btn" onclick="sendOrder()" id="stickyOrder">Оформить заказ</button>
+  </div>
+</div>
+
 <script>
 Telegram.WebApp.ready();
 
@@ -216,9 +435,9 @@ const tg_id = tgUser.id || "";
 let lang='ru',category='salads',type='delivery',payment='cash',cart={};
 
 const TEXT={
-ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'✍️ Комментарий к заказу',cash:'💵 Наличные',click:'💳 CLICK'},
-uz:{delivery:'🚚 Yetkazish',pickup:'🏃 Olib ketish',address:'📍 Manzil',phone:'📞 Telefon',cart:'🛒 Savat',order:'Buyurtma berish',comment:'✍️ Izoh',cash:'💵 Naqd',click:'💳 CLICK'},
-en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'✍️ Comment',cash:'💵 Cash',click:'💳 CLICK'}
+ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'✍️ Комментарий к заказу',cash:'💵 Наличные',click:'💳 CLICK',results:'Результаты поиска'},
+uz:{delivery:'🚚 Yetkazish',pickup:'🏃 Olib ketish',address:'📍 Manzil',phone:'📞 Telefon',cart:'🛒 Savat',order:'Buyurtma berish',comment:'✍️ Izoh',cash:'💵 Naqd',click:'💳 CLICK',results:'Qidiruv natijalari'},
+en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'✍️ Comment',cash:'💵 Cash',click:'💳 CLICK',results:'Search results'}
 };
 
 const CATS={ru:{salads:'🥗 Салаты',kebab:'🔥 Шашлык',national:'🍲 Национальные блюда',grill:'🥩 Блюда на мангале',first:'🍜 Первые блюда',drinks:'🥤 Напитки',bread:'🥖 Хлеб'},
@@ -234,8 +453,47 @@ first:[['Шурпа',35000,'images/shurpa.jpg'],['Щи зеленые',25000,'im
 drinks:[['Чай черный / зеленый',5000,'images/chay.jpg'],['Чай с лимоном',15000,'images/chay_limon.jpg'],['Fanta 1L',14000,'images/fanta_1l.jpg'],['Fanta 1.5L',18000,'images/fanta_15l.jpg'],['Coca Cola 1L',14000,'images/coca_cola_1l.jpg'],['Coca Cola 1.5L',18000,'images/coca_cola_15l.jpg'],['Сок Сочная Долина 1L',20000,'images/sok_sochnaya_dolina.png'],['Pepsi 1L',14000,'images/pepsi_1l.jpg'],['Pepsi 1.5L',18000,'images/pepsi_15l.jpg'],['Минеральная вода Chortoq 0.5L',15000,'images/chortoq_gaz_05l.jpg'],['Вода без газа Chortoq 1L',6000,'images/chortoq_1l.jpg'],['Вода без газа Chortoq 1.5L',8000,'images/chortoq_15l.jpg'],['Лимонад Тархун 0.5L',12000,'images/tarhun_05l.jpg'],['Лимонад Дюшес 0.5L',12000,'images/dyushes_05l.jpg'],['Энергетик Saber 0.5L',15000,'images/saber_05l.jpg']]
 };
 
-/* твоё — не удалял */
-function setLang(l,b){lang=l;document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyLang();}
+/* ✅ формат цены 360 000 */
+function formatSum(x){
+  const n = Number(x) || 0;
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+}
+
+/* ✅ подсветка совпадений */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function highlight(name, q){
+  const n = escapeHtml(name);
+  if(!q) return n;
+  const idx = n.toLowerCase().indexOf(q.toLowerCase());
+  if(idx === -1) return n;
+  const before = n.slice(0, idx);
+  const mid = n.slice(idx, idx + q.length);
+  const after = n.slice(idx + q.length);
+  return `${before}<mark>${mid}</mark>${after}`;
+}
+
+/* ✅ localStorage (телефон/адрес) */
+function loadSaved(){
+  const a = localStorage.getItem('kadima_address') || '';
+  const p = localStorage.getItem('kadima_phone') || '';
+  if(a && !address.value) address.value = a;
+  if(p && !phone.value) phone.value = p;
+}
+function bindSave(){
+  address.addEventListener('input', ()=>localStorage.setItem('kadima_address', address.value));
+  phone.addEventListener('input', ()=>localStorage.setItem('kadima_phone', phone.value));
+}
+
+/* язык */
+function setLang(l,b){
+  lang=l;
+  document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  applyLang();
+}
+
 function applyLang(){
   btnDelivery.innerText=TEXT[lang].delivery;
   btnPickup.innerText=TEXT[lang].pickup;
@@ -243,29 +501,75 @@ function applyLang(){
   phone.placeholder=TEXT[lang].phone;
   cartTitle.innerText=TEXT[lang].cart;
   orderBtn.innerText=TEXT[lang].order;
+  stickyOrder.innerText=TEXT[lang].order;
   comment.placeholder=TEXT[lang].comment;
   payCash.innerText=TEXT[lang].cash;
   payClick.innerText=TEXT[lang].click;
+  searchTitle.innerText = TEXT[lang].results;
+
+  renderQuickFilters();
+  renderCats();
+  renderProducts();
+  updateTotal();
+}
+
+/* ✅ Быстрые фильтры */
+function renderQuickFilters(){
+  const keys = ['kebab','salads','national','drinks']; // популярные
+  quickFilters.innerHTML = '';
+  keys.forEach(k=>{
+    if(!MENU[k]) return;
+    quickFilters.innerHTML += `<button class="qbtn" onclick="pickCategory('${k}')">${CATS[lang][k]}</button>`;
+  });
+}
+function pickCategory(k){
+  // если открыт поиск — закрываем, чтобы не путалось
+  if(isSearchOpen()) closeSearch();
+  category = k;
   renderCats();
   renderProducts();
 }
 
+/* категории */
 function renderCats(){
   cats.innerHTML='';
   for(let k in MENU){
-    cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k]}</button>`;
+    cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k] || k}</button>`;
   }
+  // ✅ автоскролл к активной категории
+  setTimeout(()=>{
+    const active = cats.querySelector('.btn.active');
+    if(active && active.scrollIntoView){
+      active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+    }
+  }, 50);
 }
 
-/* ✅ Рендер блюд (как у тебя) */
+/* карточка */
+function cardHTML(n,p,img,q=''){
+  const nameHtml = highlight(n, q);
+  return `<div class="card">
+    <div class="img"><img src="${img}" onerror="this.src='logo.png'"></div>
+    <div>${nameHtml}</div>
+    <div class="price">${formatSum(p)} <small>сум</small></div>
+    <div class="counter">
+      <button onclick="chg('${n}',-1)">−</button>
+      <span id="c_${n}">${cart[n]||0}</span>
+      <button onclick="chg('${n}',1)">+</button>
+    </div>
+  </div>`;
+}
+
+/* рендер блюд */
 function renderProducts(){
   products.innerHTML='';
   MENU[category].forEach(([n,p,img])=>{
     cart[n]=cart[n]||0;
-    products.innerHTML+=`<div class="card"><div class="img"><img src="${img}" onerror="this.src='logo.png'"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;
+    products.innerHTML+=cardHTML(n,p,img,'');
   });
 }
 
+/* корзина */
 function chg(n,v){
   cart[n]=Math.max(0,(cart[n]||0)+v);
   const el = document.getElementById('c_'+n);
@@ -273,36 +577,86 @@ function chg(n,v){
   updateTotal();
 }
 
-function updateTotal(){let s=0;for(let k in cart)s+=cart[k]*price(k);total.innerText=s;}
-function price(n){for(let c in MENU)for(let i of MENU[c])if(i[0]==n)return i[1];}
-function setType(t,b){type=t;document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
-function setPayment(p){payment=p;payCash.classList.toggle('active',p==='cash');payClick.classList.toggle('active',p==='click');}
+function price(n){
+  for(let c in MENU) for(let i of MENU[c]) if(i[0]==n) return i[1];
+  return 0;
+}
 
-/* ✅ Поиск по блюдам во всех категориях */
+function updateTotal(){
+  let s=0;
+  for(let k in cart) s += (cart[k]||0) * price(k);
+  total.innerText = formatSum(s);
+  stickyTotal.innerText = formatSum(s);
+}
+
+/* тип/оплата */
+function setType(t,b){
+  type=t;
+  document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+}
+function setPayment(p){
+  payment=p;
+  payCash.classList.toggle('active',p==='cash');
+  payClick.classList.toggle('active',p==='click');
+}
+
+/* ✅ Поиск улучшенный */
+function isSearchOpen(){
+  return searchWrap.classList.contains('show');
+}
 function toggleSearch(){
-  const si = document.getElementById('searchInput');
-  const isHidden = (si.style.display === 'none' || si.style.display === '');
-  si.style.display = isHidden ? 'block' : 'none';
-  if(isHidden){ si.value=''; si.focus(); searchProducts(); }
-  else { si.value=''; renderProducts(); }
+  if(isSearchOpen()) closeSearch();
+  else openSearch();
+}
+function openSearch(){
+  searchWrap.classList.add('show');
+  searchTitle.classList.add('show');
+  cats.style.display = 'none';       // ✅ скрываем категории
+  quickFilters.style.display = 'none';
+  searchInput.value = '';
+  searchInput.focus();
+  searchProducts();
+}
+function closeSearch(){
+  searchWrap.classList.remove('show');
+  searchTitle.classList.remove('show');
+  cats.style.display = '';           // ✅ возвращаем категории
+  quickFilters.style.display = '';
+  searchInput.value = '';
+  renderProducts();
+}
+function clearSearch(){
+  searchInput.value = '';
+  searchInput.focus();
+  searchProducts();
 }
 
 function searchProducts(){
-  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-  if(!q){ renderProducts(); return; }
-
+  const q = (searchInput.value || '').trim().toLowerCase();
   products.innerHTML='';
+
+  if(!q){
+    // при пустом — показываем текущую категорию, но категории спрятаны (по UX)
+    MENU[category].forEach(([n,p,img])=>{
+      cart[n]=cart[n]||0;
+      products.innerHTML += cardHTML(n,p,img,'');
+    });
+    return;
+  }
+
+  // ✅ ищем по всем категориям
   for(let c in MENU){
     MENU[c].forEach(([n,p,img])=>{
       if(String(n).toLowerCase().includes(q)){
         cart[n]=cart[n]||0;
-        products.innerHTML+=`<div class="card"><div class="img"><img src="${img}" onerror="this.src='logo.png'"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;
+        products.innerHTML += cardHTML(n,p,img,q);
       }
     });
   }
 }
 
-/* ✅ Отправка заказа + ник Telegram */
+/* отправка заказа */
 function sendOrder(){
   popup.classList.add('show');
   setTimeout(()=>{
@@ -320,6 +674,9 @@ function sendOrder(){
   },1200);
 }
 
+/* init */
+loadSaved();
+bindSave();
 applyLang();
 </script>
 </body>
