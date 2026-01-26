@@ -66,6 +66,19 @@ async def cmd_id(message: types.Message):
     )
 
 
+# ✅ ПИНГ АДМИНА (проверка: может ли бот писать админу)
+@dp.message(Command("ping_admin"))
+async def ping_admin(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        return await message.answer("⛔️ Нет доступа.")
+    try:
+        await bot.send_message(ADMIN_ID, "✅ TEST: бот может писать админу.")
+        await message.answer("✅ Ок: сообщение админу отправилось.")
+    except Exception as e:
+        logging.exception("PING_ADMIN ERROR")
+        await message.answer(f"❌ Не могу написать админу: <code>{esc(e)}</code>")
+
+
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(START_TEXT_3LANG, reply_markup=menu_kb())
