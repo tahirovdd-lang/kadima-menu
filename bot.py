@@ -1,7 +1,11 @@
-from aiogram import Bot, Dispatcher, executor, types
+import asyncio
 import logging
 import json
 import os
+
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import CommandStart
+from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 
 logging.basicConfig(level=logging.INFO)
 
@@ -9,17 +13,20 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
 bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 
 # ▶️ /start
-@dp.message_handler(commands=["start"])
+@dp.message(CommandStart())
 async def start(message: types.Message):
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton(
-        text="🍽 Открыть меню",
-        web_app=types.WebAppInfo(url=WEBAPP_URL)
-    ))
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(
+                text="🍽 Открыть меню",
+                web_app=WebAppInfo(url=WEBAPP_URL)
+            )]
+        ]
+    )
 
     await message.answer(
         "Добро пожаловать в <b>KADIMA Cafe</b> 👋\nНажмите кнопку ниже, чтобы открыть меню:",
@@ -28,7 +35,7 @@ async def start(message: types.Message):
 
 
 # 🔥 ПРИЁМ ДАННЫХ ИЗ WEB APP
-@dp.message_handler(content_types=types.ContentType.WEB_APP_DATA)
+@dp.message(lambda message: message.web_app_data is not None)
 async def webapp_data(message: types.Message):
     try:
         data = json.loads(message.web_app_data.data)
@@ -50,17 +57,13 @@ async def webapp_data(message: types.Message):
         logging.error(e)
 
 
-# 🚨 КЛЮЧЕВОЕ — УДАЛЯЕМ WEBHOOK ПЕРЕД ЗАПУСКОМ
-async def on_startup(dp):
+async def main():
     await bot.delete_webhook(drop_pending_updates=True)
-    print("Webhook удалён. Бот работает через polling.")
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    executor.start_polling(
-        dp,
-        skip_updates=True,
-        on_startup=on_startup
-    )
+    asyncio.run(main())
+
 
 
