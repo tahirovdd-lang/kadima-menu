@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# 🔴 ВАЖНО — ВСТАВЬ СЮДА СВОЙ TELEGRAM ID
+# 👉 ВСТАВЬ СЮДА СВОЙ TELEGRAM ID
 ADMIN_ID = 6013591658
 
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
@@ -21,7 +21,7 @@ bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
-# ▶️ СТАРТ
+# ▶️ КНОПКА ОТКРЫТЬ МЕНЮ
 @dp.message(CommandStart())
 async def start(message: types.Message):
     kb = InlineKeyboardMarkup(
@@ -39,7 +39,7 @@ async def start(message: types.Message):
     )
 
 
-# 🔥 ПРИЁМ ЗАКАЗА ИЗ WEB APP
+# 🔥 ПОЛУЧЕНИЕ ЗАКАЗА ИЗ WEB APP
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     try:
@@ -53,7 +53,6 @@ async def webapp_data(message: types.Message):
         payment = data.get("payment", "cash")
         order_type = data.get("type", "delivery")
 
-        # 🧾 ТЕКСТ ДЛЯ АДМИНА
         admin_text = "🆕 <b>НОВЫЙ ЗАКАЗ</b>\n\n"
 
         for item, qty in order.items():
@@ -68,13 +67,12 @@ async def webapp_data(message: types.Message):
             f"🚚 Тип: {order_type}"
         )
 
-        # ✅ ОТПРАВКА АДМИНУ
+        # ✅ АДМИНУ
         await bot.send_message(ADMIN_ID, admin_text)
 
-        # ✅ ОТВЕТ КЛИЕНТУ
+        # ✅ КЛИЕНТУ
         await message.answer(
-            "✅ Ваш заказ принят!\n"
-            "Спасибо за заказ"
+            "✅ Ваш заказ принят!\nСкоро с вами свяжется оператор 📞"
         )
 
     except Exception as e:
