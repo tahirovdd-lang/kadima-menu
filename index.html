@@ -710,12 +710,28 @@ document.addEventListener('click', (e)=>{
   }
 }, true);
 
+/* ✅✅✅ ИЗМЕНЕНО: отправляем только выбранные позиции (qty > 0), чтобы не превышать лимит Telegram */
 function sendOrder(){
   popup.classList.add('show');
+
+  // ✅ чистим корзину: убираем все блюда с 0
+  const cleanOrder = {};
+  for (const k in cart) {
+    const q = Number(cart[k] || 0);
+    if (q > 0) cleanOrder[k] = q;
+  }
+
+  // ✅ если ничего не выбрано — не отправляем пустой заказ
+  if (Object.keys(cleanOrder).length === 0) {
+    popup.classList.remove('show');
+    alert(lang === 'ru' ? 'Корзина пустая' : (lang === 'uz' ? 'Savat bo‘sh' : 'Cart is empty'));
+    return;
+  }
+
   setTimeout(()=>{
     Telegram.WebApp.sendData(JSON.stringify({
       tg: { id: tg_id, username: tg_username, first_name: tg_first_name },
-      order: cart,
+      order: cleanOrder,
       total: total.innerText,
       payment,
       type,
