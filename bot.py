@@ -57,7 +57,11 @@ POST_TEXT_3LANG = (
 )
 
 
-# ✅ Команда чтобы проверить реальный Telegram ID
+@dp.message(Command("health"))
+async def health(message: types.Message):
+    await message.answer("✅ Бот живой и отвечает.")
+
+
 @dp.message(Command("id"))
 async def cmd_id(message: types.Message):
     await message.answer(
@@ -66,11 +70,12 @@ async def cmd_id(message: types.Message):
     )
 
 
-# ✅ ПИНГ АДМИНА (проверка: может ли бот писать админу)
 @dp.message(Command("ping_admin"))
 async def ping_admin(message: types.Message):
+    # запускать только админом
     if message.from_user.id != ADMIN_ID:
         return await message.answer("⛔️ Нет доступа.")
+
     try:
         await bot.send_message(ADMIN_ID, "✅ TEST: бот может писать админу.")
         await message.answer("✅ Ок: сообщение админу отправилось.")
@@ -108,13 +113,12 @@ async def post_menu(message: types.Message):
         )
 
 
-# 🔥 ПРИЕМ ДАННЫХ ИЗ WEBAPP
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # ✅ Быстрый ответ клиенту, чтобы видеть факт прихода данных
+    # Быстрый ответ клиенту
     try:
         await message.answer("✅ Данные заказа получены ботом. Обрабатываю…")
     except Exception:
@@ -125,18 +129,18 @@ async def webapp_data(message: types.Message):
     except Exception:
         data = {"_raw": raw}
 
-    order = data.get("order") if isinstance(data, dict) else None
+    order = data.get("order") if isinstance(data, dict) else {}
     if not isinstance(order, dict):
         order = {}
 
-    total = str(data.get("total", "0")) if isinstance(data, dict) else "0"
-    payment = str(data.get("payment", "не указано")) if isinstance(data, dict) else "не указано"
-    order_type = str(data.get("type", "не указано")) if isinstance(data, dict) else "не указано"
-    address = str(data.get("address", "—")) if isinstance(data, dict) else "—"
-    phone = str(data.get("phone", "—")) if isinstance(data, dict) else "—"
-    comment = str(data.get("comment", "—")) if isinstance(data, dict) else "—"
+    total = str(data.get("total", "0"))
+    payment = str(data.get("payment", "не указано"))
+    order_type = str(data.get("type", "не указано"))
+    address = str(data.get("address", "—"))
+    phone = str(data.get("phone", "—"))
+    comment = str(data.get("comment", "—"))
 
-    tg = data.get("tg", {}) if isinstance(data, dict) else {}
+    tg = data.get("tg", {})
     if not isinstance(tg, dict):
         tg = {}
     tg_id = tg.get("id", "")
@@ -144,13 +148,11 @@ async def webapp_data(message: types.Message):
     tg_first_name = tg.get("first_name", "")
 
     admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
-
-    if tg_id or tg_username or tg_first_name:
-        admin_text += (
-            f"👤 <b>Клиент:</b> {esc(tg_first_name)}\n"
-            f"🆔 <b>ID:</b> {esc(tg_id)}\n"
-            f"🔗 <b>Username:</b> @{esc(tg_username) if tg_username else '—'}\n\n"
-        )
+    admin_text += (
+        f"👤 <b>Клиент:</b> {esc(tg_first_name)}\n"
+        f"🆔 <b>ID:</b> {esc(tg_id)}\n"
+        f"🔗 <b>Username:</b> @{esc(tg_username) if tg_username else '—'}\n\n"
+    )
 
     if not order:
         admin_text += "⚠️ Корзина пустая\n"
@@ -183,21 +185,6 @@ async def webapp_data(message: types.Message):
             "⚠️ Но админу не удалось отправить уведомление.\n"
             f"Причина: <code>{esc(e)}</code>"
         )
-
-
-# ✅ ДИАГНОСТИКА (НЕ ПЕРЕХВАТЫВАЕТ КОМАНДЫ)
-@dp.message()
-async def any_message_logger(message: types.Message):
-    try:
-        # команды не трогаем
-        if message.text and message.text.startswith("/"):
-            return
-        logging.info(
-            f"IN MSG: chat_id={message.chat.id} type={message.content_type} "
-            f"from={message.from_user.id if message.from_user else None}"
-        )
-    except Exception:
-        pass
 
 
 async def main():
