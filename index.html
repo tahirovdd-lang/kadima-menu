@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>KADIMA</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
 
@@ -15,42 +15,64 @@
 --green:#1F4D3A;
 --meat:#8B1E1E;
 }
-*{box-sizing:border-box;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{margin:0;font-family:'Montserrat',sans-serif;background:var(--bg);color:#2b2b2b;}
 
 /* HEADER */
 .header{
-padding:16px 12px;
+padding:16px 12px 26px;
 background:linear-gradient(135deg,var(--terracotta),var(--gold));
 color:white;
 box-shadow:0 6px 18px rgba(120,70,20,.25);
 display:flex;align-items:center;justify-content:center;position:relative;text-align:center;
 }
-.header img{position:absolute;left:12px;width:110px;} /* УВЕЛИЧИЛ ЛОГО */
+.header img{position:absolute;left:12px;width:110px;}
 .brand-title{font-family:'Lobster',cursive;font-size:36px;}
 .brand-sub{font-weight:800;font-size:15px;}
-.brand-phone a{color:white;text-decoration:none;font-size:14px;}
+.brand-phone a{color:white;text-decoration:none;font-size:15px;font-weight:700;}
+.search-btn{
+position:absolute;right:14px;bottom:10px;
+width:34px;height:34px;border-radius:50%;
+background:white;color:#333;display:flex;align-items:center;justify-content:center;
+font-size:16px;font-weight:700;
+}
 
-/* LANGUAGE */
-.langs{display:flex;gap:10px;padding:10px;justify-content:center;}
-.btn{padding:10px 16px;border-radius:24px;background:#fffdf9;border:1px solid #f0e6d6;font-weight:700;white-space:nowrap;}
+/* LANGUAGE BIGGER */
+.langs{display:flex;gap:12px;padding:12px;justify-content:center;}
+.langs .btn{font-size:16px;padding:12px 20px}
+
+/* BUTTON BASE */
+.btn{
+padding:12px 20px;border-radius:28px;background:#fffdf9;border:1px solid #f0e6d6;
+font-weight:700;white-space:nowrap;min-width:120px;text-align:center;
+}
 .btn.active{background:linear-gradient(135deg,var(--terracotta),var(--gold));color:white;border:none;}
 
-.types,.categories,.payments{display:flex;gap:10px;padding:12px;overflow-x:auto;}
+/* TYPES CENTERED */
+.types{display:flex;gap:14px;padding:14px;justify-content:center;}
+.types .btn{font-size:16px;min-width:150px}
 
-.categories .btn{font-size:16px;padding:12px 18px;} /* КРУПНЕЕ КАТЕГОРИИ */
+/* ADDRESS + PHONE CENTER */
+.input{
+margin:8px auto;
+display:block;
+padding:14px;
+width:85%;
+border-radius:20px;
+border:1px solid #e6dac6;
+background:#fffdf9;
+font-size:15px;
+}
 
-/* ADDRESS + PHONE INLINE */
-.row{display:flex;gap:8px;padding:0 12px;}
-.row .input{flex:1;margin:6px 0;padding:10px;font-size:14px;border-radius:16px;border:1px solid #e6dac6;background:#fffdf9;}
-
-textarea.input{margin:8px 12px;width:calc(100% - 24px);}
+/* CATEGORIES WIDER */
+.categories{display:flex;gap:12px;padding:14px;overflow-x:auto;}
+.categories .btn{font-size:16px;padding:14px 22px;}
 
 /* PRODUCTS */
 .products{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px;}
 .card{border-radius:20px;background:#fffdf9;box-shadow:0 8px 18px rgba(120,70,20,.15);padding:10px;text-align:center;border:1px solid #f0e6d6;}
 .img{height:70px;display:flex;align-items:center;justify-content:center;}
-.img img{max-width:45px;opacity:.8;}
+.img img{max-width:48px;opacity:.85;}
 .price{font-weight:800;color:var(--meat);margin-top:6px;}
 
 .counter{display:flex;justify-content:center;gap:10px;margin-top:6px;}
@@ -58,12 +80,22 @@ textarea.input{margin:8px 12px;width:calc(100% - 24px);}
 
 /* CART */
 .cart{background:#fffdf9;margin:12px;padding:16px;border-radius:20px;border:1px solid #f0e6d6;}
-.order-btn{width:100%;padding:16px;margin-top:14px;border:none;border-radius:20px;background:linear-gradient(135deg,var(--green),#2e7d32);color:white;font-size:16px;font-weight:800;}
+
+.payments{display:flex;gap:16px;justify-content:center;margin-top:10px;}
+.payments .btn{font-size:16px;padding:14px 26px;min-width:140px}
+
+textarea.input{height:90px;font-size:15px;}
+
+.order-btn{width:100%;padding:18px;margin-top:14px;border:none;border-radius:20px;background:linear-gradient(135deg,var(--green),#2e7d32);color:white;font-size:17px;font-weight:800;}
 
 /* POPUP */
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
 .popup.show{opacity:1;pointer-events:auto;}
 .popup-box{background:white;padding:26px;border-radius:20px;text-align:center;font-weight:700;}
+
+@media(max-width:380px){
+.products{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 
@@ -74,8 +106,11 @@ textarea.input{margin:8px 12px;width:calc(100% - 24px);}
   <div>
     <div class="brand-title">KADIMA</div>
     <div class="brand-sub">Signature taste</div>
-    <div class="brand-phone"><a href="tel:+998905389999">+998 90 538 99 99</a></div>
+    <div class="brand-phone">
+      <a href="tel:+998905389999">+998 90 538 99 99</a>
+    </div>
   </div>
+  <div class="search-btn">🔍</div>
 </div>
 
 <div class="langs">
@@ -89,10 +124,8 @@ textarea.input{margin:8px 12px;width:calc(100% - 24px);}
   <button class="btn" id="btnPickup" onclick="setType('pickup',this)"></button>
 </div>
 
-<div class="row">
-  <input id="address" class="input">
-  <input id="phone" class="input">
-</div>
+<input id="address" class="input">
+<input id="phone" class="input">
 
 <div class="categories" id="cats"></div>
 <div class="products" id="products"></div>
@@ -118,17 +151,15 @@ Telegram.WebApp.ready();
 let lang='ru',category='salads',type='delivery',payment='cash',cart={};
 
 const TEXT={
-ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'✍️ Комментарий к заказу',cash:'💵 Наличные',click:'💳 CLICK'},
+ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'✍️ Комментарий к заказу',cash:'💵 Наличные',click:'💳 CLICK'},
 uz:{delivery:'🚚 Yetkazish',pickup:'🏃 Olib ketish',address:'📍 Manzil',phone:'📞 Telefon',cart:'🛒 Savat',order:'Buyurtma berish',comment:'✍️ Izoh',cash:'💵 Naqd',click:'💳 CLICK'},
 en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'✍️ Comment',cash:'💵 Cash',click:'💳 CLICK'}
 };
 
 const CATS={salads:'🥗',kebab:'🔥',drinks:'🥤',bread:'🥖'};
-const CAT_NAMES={
-ru:{salads:'Салаты',kebab:'Шашлык',drinks:'Напитки',bread:'Хлеб'},
+const CAT_NAMES={ru:{salads:'Салаты',kebab:'Шашлык',drinks:'Напитки',bread:'Хлеб'},
 uz:{salads:'Salatlar',kebab:'Shashlik',drinks:'Ichimliklar',bread:'Non'},
-en:{salads:'Salads',kebab:'Kebab',drinks:'Drinks',bread:'Bread'}
-};
+en:{salads:'Salads',kebab:'Kebab',drinks:'Drinks',bread:'Bread'}};
 
 const MENU={salads:[['Свежий',30000],['Цезарь',35000]],kebab:[['Молотый',28000]],drinks:[['Coca Cola 1L',14000]],bread:[['Лепешка',10000]]};
 
@@ -146,20 +177,8 @@ payClick.innerText=TEXT[lang].click;
 renderCats();renderProducts();
 }
 
-function renderCats(){
-cats.innerHTML='';
-for(let k in CATS){
-cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[k]} ${CAT_NAMES[lang][k]}</button>`;
-}
-}
-
-function renderProducts(){
-products.innerHTML='';
-MENU[category].forEach(([n,p])=>{
-cart[n]=cart[n]||0;
-products.innerHTML+=`<div class="card"><div class="img"><img src="logo.png"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;
-});
-}
+function renderCats(){cats.innerHTML='';for(let k in CATS){cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[k]} ${CAT_NAMES[lang][k]}</button>`;}}
+function renderProducts(){products.innerHTML='';MENU[category].forEach(([n,p])=>{cart[n]=cart[n]||0;products.innerHTML+=`<div class="card"><div class="img"><img src="logo.png"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;});}
 
 function chg(n,v){cart[n]=Math.max(0,(cart[n]||0)+v);document.getElementById('c_'+n).innerText=cart[n];updateTotal();}
 function updateTotal(){let s=0;for(let k in cart)s+=cart[k]*price(k);total.innerText=s;}
