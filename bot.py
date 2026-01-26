@@ -5,7 +5,7 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # берём токен из BotHost
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
 bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
@@ -32,7 +32,6 @@ async def start(message: types.Message):
 async def webapp_data(message: types.Message):
     try:
         data = json.loads(message.web_app_data.data)
-
         order = data.get("order", {})
         total = data.get("total", 0)
 
@@ -51,9 +50,17 @@ async def webapp_data(message: types.Message):
         logging.error(e)
 
 
+# 🚨 КЛЮЧЕВОЕ — УДАЛЯЕМ WEBHOOK ПЕРЕД ЗАПУСКОМ
+async def on_startup(dp):
+    await bot.delete_webhook(drop_pending_updates=True)
+    print("Webhook удалён. Бот работает через polling.")
+
+
 if __name__ == "__main__":
     executor.start_polling(
         dp,
-        skip_updates=True
+        skip_updates=True,
+        on_startup=on_startup
     )
+
 
