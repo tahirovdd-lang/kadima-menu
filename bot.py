@@ -3,7 +3,7 @@ import logging
 import json
 import os
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.client.default import DefaultBotProperties
@@ -11,17 +11,17 @@ from aiogram.client.default import DefaultBotProperties
 logging.basicConfig(level=logging.INFO)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# 🔴 ВАЖНО — ВСТАВЬ СЮДА СВОЙ TELEGRAM ID
+ADMIN_ID = 6013591658
+
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
-bot = Bot(
-    token=BOT_TOKEN,
-    default=DefaultBotProperties(parse_mode="HTML")
-)
-
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
-# ▶️ /start
+# ▶️ СТАРТ
 @dp.message(CommandStart())
 async def start(message: types.Message):
     kb = InlineKeyboardMarkup(
@@ -39,27 +39,47 @@ async def start(message: types.Message):
     )
 
 
-# 🔥 ПРИЁМ ДАННЫХ ИЗ WEB APP
-@dp.message(lambda message: message.web_app_data is not None)
+# 🔥 ПРИЁМ ЗАКАЗА ИЗ WEB APP
+@dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     try:
         data = json.loads(message.web_app_data.data)
+
         order = data.get("order", {})
         total = data.get("total", 0)
+        phone = data.get("phone", "не указан")
+        address = data.get("address", "самовывоз")
+        comment = data.get("comment", "нет")
+        payment = data.get("payment", "cash")
+        order_type = data.get("type", "delivery")
 
-        text = "✅ <b>Заказ принят:</b>\n\n"
+        # 🧾 ТЕКСТ ДЛЯ АДМИНА
+        admin_text = "🆕 <b>НОВЫЙ ЗАКАЗ</b>\n\n"
 
         for item, qty in order.items():
-            if qty > 0:
-                text += f"• {item} × {qty}\n"
+            admin_text += f"• {item} × {qty}\n"
 
-        text += f"\n💰 <b>Сумма:</b> {total} сум"
+        admin_text += (
+            f"\n💰 Сумма: <b>{total} сум</b>\n"
+            f"📞 Телефон: {phone}\n"
+            f"📍 Адрес: {address}\n"
+            f"💬 Комментарий: {comment}\n"
+            f"💳 Оплата: {payment}\n"
+            f"🚚 Тип: {order_type}"
+        )
 
-        await message.answer(text)
+        # ✅ ОТПРАВКА АДМИНУ
+        await bot.send_message(ADMIN_ID, admin_text)
+
+        # ✅ ОТВЕТ КЛИЕНТУ
+        await message.answer(
+            "✅ Ваш заказ принят!\n"
+            "Спасибо за заказ"
+        )
 
     except Exception as e:
-        await message.answer("Ошибка обработки заказа ❌")
         logging.error(e)
+        await message.answer("Ошибка обработки заказа ❌")
 
 
 async def main():
@@ -69,7 +89,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-
