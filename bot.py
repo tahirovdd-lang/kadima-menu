@@ -11,14 +11,14 @@ from aiogram.client.default import DefaultBotProperties
 logging.basicConfig(level=logging.INFO)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = 6013591658   # ← ТВОЙ TELEGRAM ID
+ADMIN_ID = 6013591658
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
-# ▶️ КНОПКА ОТКРЫТЬ МЕНЮ
+# ▶️ СТАРТ
 @dp.message(CommandStart())
 async def start(message: types.Message):
     kb = InlineKeyboardMarkup(
@@ -31,7 +31,8 @@ async def start(message: types.Message):
     )
 
     await message.answer(
-        "👋 Добро пожаловать в <b>KADIMA Cafe</b>\nНажмите кнопку ниже, чтобы открыть меню:",
+        "👋 Добро пожаловать в <b>KADIMA Cafe</b>\n"
+        "Нажмите кнопку ниже, чтобы открыть меню:",
         reply_markup=kb
     )
 
@@ -40,22 +41,31 @@ async def start(message: types.Message):
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     try:
-        data = json.loads(message.web_app_data.data)
+        raw = message.web_app_data.data
+        logging.info(f"WEBAPP DATA RAW: {raw}")
 
-        order = data.get("order", {})
-        total = data.get("total", 0)
-        payment = data.get("payment", "не указано")
-        order_type = data.get("type", "не указано")
-        address = data.get("address", "—")
-        phone = data.get("phone", "—")
-        comment = data.get("comment", "—")
+        data = json.loads(raw)
 
-        # 🧾 Сообщение админу
+        order = data.get("order") or {}
+        total = str(data.get("total") or "0")
+        payment = str(data.get("payment") or "не указано")
+        order_type = str(data.get("type") or "не указано")
+        address = str(data.get("address") or "—")
+        phone = str(data.get("phone") or "—")
+        comment = str(data.get("comment") or "—")
+
+        # 🧾 СООБЩЕНИЕ АДМИНУ
         admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
 
-        for item, qty in order.items():
-            if int(qty) > 0:
-                admin_text += f"• {item} × {qty}\n"
+        if not order:
+            admin_text += "⚠️ Корзина пустая\n"
+        else:
+            for item, qty in order.items():
+                try:
+                    if int(qty) > 0:
+                        admin_text += f"• {item} × {qty}\n"
+                except:
+                    pass
 
         admin_text += (
             f"\n💰 <b>Сумма:</b> {total} сум"
@@ -72,11 +82,13 @@ async def webapp_data(message: types.Message):
         # 📩 ОТВЕТ КЛИЕНТУ
         await message.answer(
             "✅ <b>Ваш заказ принят!</b>\n"
-            "Наш оператор свяжется с вами для подтверждения 📞"
+            "С вами скоро свяжется оператор 📞"
         )
 
+        logging.info("ORDER SENT TO ADMIN SUCCESSFULLY")
+
     except Exception as e:
-        logging.error(e)
+        logging.exception("ORDER PROCESSING ERROR")
         await message.answer("❌ Ошибка обработки заказа")
 
 
