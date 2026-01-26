@@ -17,30 +17,142 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{margin:0;font-family:'Montserrat',sans-serif;background:var(--bg);color:#2b2b2b;}
-.header{padding:16px 12px 26px;background:linear-gradient(135deg,var(--terracotta),var(--gold));color:white;box-shadow:0 6px 18px rgba(120,70,20,.25);display:flex;align-items:center;justify-content:center;position:relative;text-align:center;}
+
+.header{
+  padding:16px 12px 26px;
+  background:linear-gradient(135deg,var(--terracotta),var(--gold));
+  color:white;
+  box-shadow:0 6px 18px rgba(120,70,20,.25);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  text-align:center;
+}
 .header img{position:absolute;left:12px;width:110px;}
+
 .brand-title{font-family:'Lobster',cursive;font-size:36px;}
 .brand-sub{font-weight:800;font-size:15px;}
-.brand-phone a{color:white;text-decoration:none;font-size:15px;font-weight:700;}
-.search-btn{position:absolute;right:14px;bottom:10px;width:34px;height:34px;border-radius:50%;background:white;color:#333;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;}
+
+/* ✅ Телефон кликабельный */
+.brand-phone{position:relative; z-index:30; pointer-events:auto;}
+.brand-phone a{
+  color:white;
+  text-decoration:none;
+  font-size:15px;
+  font-weight:700;
+  position:relative;
+  z-index:31;
+  pointer-events:auto;
+}
+
+/* ✅ Контур у кнопки поиска + кликабельность */
+.search-btn{
+  position:absolute;
+  right:14px;
+  bottom:10px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:white;
+  color:#333;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  font-weight:700;
+  border:2px solid #000;
+  cursor:pointer;
+  z-index:25;
+}
+
 .langs,.types,.payments{display:flex;gap:12px;padding:12px;justify-content:center;}
-.btn{padding:12px 20px;border-radius:28px;background:#fffdf9;border:1px solid #f0e6d6;font-weight:700;min-width:120px;text-align:center;}
-.btn.active{background:linear-gradient(135deg,var(--terracotta),var(--gold));color:white;border:none;}
-.input{margin:8px auto;display:block;padding:14px;width:85%;border-radius:20px;border:1px solid #e6dac6;background:#fffdf9;font-size:15px;}
+
+/* ✅ Контур у всех кнопок */
+.btn{
+  padding:12px 20px;
+  border-radius:28px;
+  background:#fffdf9;
+  border:2px solid #000;
+  font-weight:700;
+  min-width:120px;
+  text-align:center;
+  cursor:pointer;
+}
+.btn.active{
+  background:linear-gradient(135deg,var(--terracotta),var(--gold));
+  color:white;
+  border:2px solid #000;
+}
+
+.input{
+  margin:8px auto;
+  display:block;
+  padding:14px;
+  width:85%;
+  border-radius:20px;
+  border:2px solid #000;
+  background:#fffdf9;
+  font-size:15px;
+}
+
 .categories{display:flex;gap:12px;padding:14px;overflow-x:auto;}
 .products{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px;}
-.card{border-radius:20px;background:#fffdf9;box-shadow:0 8px 18px rgba(120,70,20,.15);padding:10px;text-align:center;border:1px solid #f0e6d6;}
+
+/* ✅ Контур карточек */
+.card{
+  border-radius:20px;
+  background:#fffdf9;
+  box-shadow:0 8px 18px rgba(120,70,20,.15);
+  padding:10px;
+  text-align:center;
+  border:2px solid #000;
+}
+
 .img{height:70px;display:flex;align-items:center;justify-content:center;}
 .img img{max-width:58px;opacity:.9;}
 .price{font-weight:800;color:var(--meat);margin-top:6px;}
 .counter{display:flex;justify-content:center;gap:10px;margin-top:6px;}
-.counter button{width:30px;height:30px;border-radius:50%;border:none;background:var(--green);color:white;font-size:16px;}
-.cart{background:#fffdf9;margin:12px;padding:16px;border-radius:20px;border:1px solid #f0e6d6;}
+
+/* ✅ Контур у +/- */
+.counter button{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  border:2px solid #000;
+  background:var(--green);
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.cart{
+  background:#fffdf9;
+  margin:12px;
+  padding:16px;
+  border-radius:20px;
+  border:2px solid #000;
+}
+
 textarea.input{height:90px;}
-.order-btn{width:100%;padding:18px;margin-top:14px;border:none;border-radius:20px;background:linear-gradient(135deg,var(--green),#2e7d32);color:white;font-size:17px;font-weight:800;}
+
+/* ✅ Контур у кнопки заказа */
+.order-btn{
+  width:100%;
+  padding:18px;
+  margin-top:14px;
+  border:2px solid #000;
+  border-radius:20px;
+  background:linear-gradient(135deg,var(--green),#2e7d32);
+  color:white;
+  font-size:17px;
+  font-weight:800;
+  cursor:pointer;
+}
+
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
 .popup.show{opacity:1;pointer-events:auto;}
-.popup-box{background:white;padding:26px;border-radius:20px;text-align:center;font-weight:700;}
+.popup-box{background:white;padding:26px;border-radius:20px;text-align:center;font-weight:700;border:2px solid #000;}
 </style>
 </head>
 
@@ -51,10 +163,16 @@ textarea.input{height:90px;}
   <div>
     <div class="brand-title">KADIMA</div>
     <div class="brand-sub">Signature taste</div>
-    <div class="brand-phone"><a href="tel:+998905389999">+998 90 538 99 99</a></div>
+    <div class="brand-phone">
+      <a href="tel:+998905389999">+998 90 538 99 99</a>
+    </div>
   </div>
-  <div class="search-btn">🔍</div>
+  <!-- ✅ Поиск кликабельный -->
+  <div class="search-btn" onclick="toggleSearch()">🔍</div>
 </div>
+
+<!-- ✅ Поле поиска (скрыто, открывается кнопкой 🔍) -->
+<input id="searchInput" class="input" style="display:none" placeholder="Поиск блюда..." oninput="searchProducts()">
 
 <div class="langs">
   <button class="btn active" onclick="setLang('ru',this)">RU</button>
@@ -88,6 +206,13 @@ textarea.input{height:90px;}
 <script>
 Telegram.WebApp.ready();
 
+/* ✅ Ник/данные Telegram пользователя */
+const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
+const tg_username = tgUser.username || "";
+const tg_first_name = tgUser.first_name || "";
+const tg_id = tgUser.id || "";
+
+/* твоё — не удалял */
 let lang='ru',category='salads',type='delivery',payment='cash',cart={};
 
 const TEXT={
@@ -109,16 +234,92 @@ first:[['Шурпа',35000,'images/shurpa.jpg'],['Щи зеленые',25000,'im
 drinks:[['Чай черный / зеленый',5000,'images/chay.jpg'],['Чай с лимоном',15000,'images/chay_limon.jpg'],['Fanta 1L',14000,'images/fanta_1l.jpg'],['Fanta 1.5L',18000,'images/fanta_15l.jpg'],['Coca Cola 1L',14000,'images/coca_cola_1l.jpg'],['Coca Cola 1.5L',18000,'images/coca_cola_15l.jpg'],['Сок Сочная Долина 1L',20000,'images/sok_sochnaya_dolina.png'],['Pepsi 1L',14000,'images/pepsi_1l.jpg'],['Pepsi 1.5L',18000,'images/pepsi_15l.jpg'],['Минеральная вода Chortoq 0.5L',15000,'images/chortoq_gaz_05l.jpg'],['Вода без газа Chortoq 1L',6000,'images/chortoq_1l.jpg'],['Вода без газа Chortoq 1.5L',8000,'images/chortoq_15l.jpg'],['Лимонад Тархун 0.5L',12000,'images/tarhun_05l.jpg'],['Лимонад Дюшес 0.5L',12000,'images/dyushes_05l.jpg'],['Энергетик Saber 0.5L',15000,'images/saber_05l.jpg']]
 };
 
+/* твоё — не удалял */
 function setLang(l,b){lang=l;document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');applyLang();}
-function applyLang(){btnDelivery.innerText=TEXT[lang].delivery;btnPickup.innerText=TEXT[lang].pickup;address.placeholder=TEXT[lang].address;phone.placeholder=TEXT[lang].phone;cartTitle.innerText=TEXT[lang].cart;orderBtn.innerText=TEXT[lang].order;comment.placeholder=TEXT[lang].comment;payCash.innerText=TEXT[lang].cash;payClick.innerText=TEXT[lang].click;renderCats();renderProducts();}
-function renderCats(){cats.innerHTML='';for(let k in MENU){cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k]}</button>`;}}
-function renderProducts(){products.innerHTML='';MENU[category].forEach(([n,p,img])=>{cart[n]=cart[n]||0;products.innerHTML+=`<div class="card"><div class="img"><img src="${img}" onerror="this.src='logo.png'"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;});}
-function chg(n,v){cart[n]=Math.max(0,(cart[n]||0)+v);document.getElementById('c_'+n).innerText=cart[n];updateTotal();}
+function applyLang(){
+  btnDelivery.innerText=TEXT[lang].delivery;
+  btnPickup.innerText=TEXT[lang].pickup;
+  address.placeholder=TEXT[lang].address;
+  phone.placeholder=TEXT[lang].phone;
+  cartTitle.innerText=TEXT[lang].cart;
+  orderBtn.innerText=TEXT[lang].order;
+  comment.placeholder=TEXT[lang].comment;
+  payCash.innerText=TEXT[lang].cash;
+  payClick.innerText=TEXT[lang].click;
+  renderCats();
+  renderProducts();
+}
+
+function renderCats(){
+  cats.innerHTML='';
+  for(let k in MENU){
+    cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k]}</button>`;
+  }
+}
+
+/* ✅ Рендер блюд (как у тебя) */
+function renderProducts(){
+  products.innerHTML='';
+  MENU[category].forEach(([n,p,img])=>{
+    cart[n]=cart[n]||0;
+    products.innerHTML+=`<div class="card"><div class="img"><img src="${img}" onerror="this.src='logo.png'"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;
+  });
+}
+
+function chg(n,v){
+  cart[n]=Math.max(0,(cart[n]||0)+v);
+  const el = document.getElementById('c_'+n);
+  if(el) el.innerText=cart[n];
+  updateTotal();
+}
+
 function updateTotal(){let s=0;for(let k in cart)s+=cart[k]*price(k);total.innerText=s;}
 function price(n){for(let c in MENU)for(let i of MENU[c])if(i[0]==n)return i[1];}
 function setType(t,b){type=t;document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
 function setPayment(p){payment=p;payCash.classList.toggle('active',p==='cash');payClick.classList.toggle('active',p==='click');}
-function sendOrder(){popup.classList.add('show');setTimeout(()=>{Telegram.WebApp.sendData(JSON.stringify({order:cart,total:total.innerText,payment,type,address:address.value,phone:phone.value,comment:comment.value}));Telegram.WebApp.close();},1200);}
+
+/* ✅ Поиск по блюдам во всех категориях */
+function toggleSearch(){
+  const si = document.getElementById('searchInput');
+  const isHidden = (si.style.display === 'none' || si.style.display === '');
+  si.style.display = isHidden ? 'block' : 'none';
+  if(isHidden){ si.value=''; si.focus(); searchProducts(); }
+  else { si.value=''; renderProducts(); }
+}
+
+function searchProducts(){
+  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  if(!q){ renderProducts(); return; }
+
+  products.innerHTML='';
+  for(let c in MENU){
+    MENU[c].forEach(([n,p,img])=>{
+      if(String(n).toLowerCase().includes(q)){
+        cart[n]=cart[n]||0;
+        products.innerHTML+=`<div class="card"><div class="img"><img src="${img}" onerror="this.src='logo.png'"></div><div>${n}</div><div class="price">${p} сум</div><div class="counter"><button onclick="chg('${n}',-1)">−</button><span id="c_${n}">${cart[n]}</span><button onclick="chg('${n}',1)">+</button></div></div>`;
+      }
+    });
+  }
+}
+
+/* ✅ Отправка заказа + ник Telegram */
+function sendOrder(){
+  popup.classList.add('show');
+  setTimeout(()=>{
+    Telegram.WebApp.sendData(JSON.stringify({
+      tg: { id: tg_id, username: tg_username, first_name: tg_first_name },
+      order: cart,
+      total: total.innerText,
+      payment,
+      type,
+      address: address.value,
+      phone: phone.value,
+      comment: comment.value
+    }));
+    Telegram.WebApp.close();
+  },1200);
+}
+
 applyLang();
 </script>
 </body>
