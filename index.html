@@ -135,12 +135,33 @@ renderCats();renderProducts();
 }
 
 function sendOrder(){
-const order={};for(let k in cart) if(cart[k]>0) order[k]=cart[k];
-Telegram.WebApp.sendData(JSON.stringify({order,total:total.innerText,payment,type,address:address.value,phone:phone.value,comment:comment.value}));
-Telegram.WebApp.close();
-}
+  const order = {};
+  for(let k in cart) if(cart[k] > 0) order[k] = cart[k];
 
-applyLang();
-</script>
-</body>
-</html>
+  if(Object.keys(order).length === 0){
+    alert("Добавьте товары в корзину");
+    return;
+  }
+
+  if(type === 'delivery' && address.value.trim() === ''){
+    alert("Введите адрес доставки");
+    return;
+  }
+
+  if(phone.value.trim() === ''){
+    alert("Введите номер телефона");
+    return;
+  }
+
+  Telegram.WebApp.sendData(JSON.stringify({
+    order: order,
+    total: total.innerText,
+    payment: payment,
+    type: type,
+    address: address.value,
+    phone: phone.value,
+    comment: comment.value
+  }));
+
+  Telegram.WebApp.close();
+}
