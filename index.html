@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>KADIMA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --blue:#4a90e2;
+    --green:#2e7d32;
+    --bg:#f2f4f7;
+}
+
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    background:linear-gradient(180deg,#eef2f7,#f7f9fc);
+    color:#1c1c1e;
+}
+
+/* HEADER */
+.header{
+    padding:16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:linear-gradient(135deg,#4a90e2,#6fb1ff);
+    color:#fff;
+    box-shadow:0 6px 20px rgba(0,0,0,.12);
+}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.header img{max-width:110px;}
+.header-title{
+    font-family:'Montserrat',sans-serif;
+    font-size:32px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+.search-btn{
+    width:38px;height:38px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,.25);
+    color:#fff;
+    font-size:18px;
+}
+
+/* SEARCH */
+.search-input{
+    display:none;
+    margin:10px;
+    padding:14px;
+    width:calc(100% - 20px);
+    border-radius:18px;
+    border:none;
+    box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* BUTTONS */
+.langs,.types,.categories,.payments{
+    display:flex;
+    gap:10px;
+    padding:10px;
+    overflow-x:auto;
+}
+.btn{
+    padding:10px 18px;
+    border-radius:22px;
+    background:#fff;
+    border:1px solid #e1e5ea;
+    font-size:14px;
+    font-weight:600;
+}
+.btn.active{
+    background:linear-gradient(135deg,#4a90e2,#6fb1ff);
+    color:#fff;
+    border:none;
+}
+
+/* INPUTS */
+.input,textarea{
+    margin:10px;
+    padding:14px;
+    width:calc(100% - 20px);
+    border-radius:18px;
+    border:none;
+    font-size:14px;
+    background:#fff;
+}
+textarea{resize:none;}
+
+/* PRODUCTS */
+.products{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+    padding:12px;
+}
+.card{
+    background:#fff;
+    border-radius:20px;
+    padding:12px;
+    text-align:center;
+    box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
+.img{
+    height:110px;
+    border-radius:16px;
+    background:#f0f2f5;
+    overflow:hidden;
+}
+.img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.price{margin-top:8px;font-weight:800;color:var(--green);}
+.name{font-size:14px;margin-top:6px;}
+
+/* COUNTER */
+.counter{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    margin-top:8px;
+}
+.counter span{font-weight:800;}
+.counter button{
+    width:32px;height:32px;
+    border-radius:50%;
+    border:none;
+    font-size:18px;
+}
+
+/* CART */
+.cart{
+    background:#fff;
+    margin:12px;
+    padding:16px;
+    border-radius:22px;
+}
+.order-btn{
+    width:100%;
+    padding:16px;
+    margin-top:14px;
+    border:none;
+    border-radius:20px;
+    background:linear-gradient(135deg,#4a90e2,#6fb1ff);
+    color:#fff;
+    font-size:16px;
+    font-weight:800;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="logo-wrap">
+        <img src="logo.png">
+        <div class="header-title">KADIMA</div>
+    </div>
+    <button class="search-btn" onclick="toggleSearch()">🔍</button>
+</div>
+
+<input id="search" class="search-input">
+
+<div class="langs">
+    <button class="btn active" onclick="setLang('ru',this)">RU</button>
+    <button class="btn" onclick="setLang('uz',this)">UZ</button>
+    <button class="btn" onclick="setLang('en',this)">EN</button>
+</div>
+
+<div class="types">
+    <button class="btn active" onclick="setType('delivery',this)" id="btnDelivery"></button>
+    <button class="btn" onclick="setType('pickup',this)" id="btnPickup"></button>
+</div>
+
+<input id="address" class="input">
+<input id="phone" class="input">
+
+<div class="categories" id="cats"></div>
+<div class="products" id="products"></div>
+
+<div class="cart">
+    <b id="cartTitle"></b>: <span id="total">0</span> сум
+    <textarea id="comment" rows="3"></textarea>
+
+    <div class="payments">
+        <button class="btn active" onclick="setPayment('cash')" id="payCash">💵 Наличные</button>
+        <button class="btn" onclick="setPayment('click')" id="payClick">💳 CLICK</button>
+    </div>
+
+    <button class="order-btn" onclick="sendOrder()" id="orderBtn"></button>
+</div>
+
+<script>
+Telegram.WebApp.ready();
+
+let lang='ru',category='salads',type='delivery',cart={},searchValue='';
+let payment='cash';
+
+/* ТЕКСТЫ */
+const TEXT={
+ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'💬 Комментарий к заказу',search:'🔎 Поиск блюд'},
+uz:{delivery:'🚚 Yetkazib berish',pickup:'🏃 Olib ketish',address:'📍 Manzil',phone:'📞 Telefon',cart:'🛒 Savat',order:'Buyurtma berish',comment:'💬 Izoh',search:'🔎 Qidirish'},
+en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'💬 Comment',search:'🔎 Search'}
+};
+
+/* КАТЕГОРИИ */
+const CATS={ ...CATS }; // оставляем как есть из твоего кода
+</script>
+
+ru:{salads:'🥗 Салаты',kebab:'🔥 Шашлык',national:'🍲 Национальные блюда',grill:'🥩 Блюда на мангале',first:'🍜 Первые блюда',drinks:'🥤 Напитки',bread:'🥖 Хлеб'},
+uz:{salads:'🥗 Salatlar',kebab:'🔥 Shashlik',national:'🍲 Milliy taomlar',grill:'🥩 Mangal taomlari',first:'🍜 Birinchi taomlar',drinks:'🥤 Ichimliklar',bread:'🥖 Non'},
+en:{salads:'🥗 Salads',kebab:'🔥 Kebab',national:'🍲 National dishes',grill:'🥩 Grill dishes',first:'🍜 First dishes',drinks:'🥤 Drinks',bread:'🥖 Bread'}
+};
+
+const MENU = {
+salads:[
+    ['Свежий',30000,'images/svejiy.jpg'],
+    ['Салат «Ачичук»',30000,'images/achichuk.png'],
+    ['Салат «Шакароп»',30000,'images/shakarop.png'],
+    ['Салат «Чирокчи»',30000,'images/chirokchi.png'],
+    ['Салат «Мясной»',35000,'images/myasnoy.jpg'],
+    ['Салат «Греческий»',40000,'images/grecheskiy.jpg'],
+    ['Салат «Мажнунтол»',30000,'images/mazhnuntol.jpg'],
+    ['Салат «Мужской каприз»',35000,'images/muzhskoy_kapriz.jpg'],
+    ['Салат «Дамский каприз»',35000,'images/damskiy_kapriz.jpg'],
+    ['Салат «Оливье»',30000,'images/olivye.jpg'],
+    ['Салат «Французский»',35000,'images/frantsuzskiy.jpg'],
+    ['Салат «Смак»',35000,'images/smak.jpg'],
+    ['Цезарь',35000,'images/cezar.jpg'],
+    ['Хрустящий баклажан',45000,'images/baklajan.jpg']
+],
+
+kebab:[
+    ['Молотый',28000,'images/molotiy.jpg'],
+    ['Молотый микс',30000,'images/molotiy_mix.jpg'],
+    ['Кусковой баранина',30000,'images/kuskovoy_baranina.jpg'],
+    ['Рулет',30000,'images/rulet.jpg'],
+    ['Наполеон',30000,'images/napoleon.jpg'],
+    ['Корейка',40000,'images/koreyka.jpg'],
+    ['Быкин',40000,'images/bykin.jpg'],
+    ['Ребрышки (семечки)',30000,'images/rebryshki.jpg'],
+    ['Печень',22000,'images/pechen.jpg'],
+    ['Курдюк',30000,'images/kurdyuk.jpg'],
+    ['Помидоры 3шт',12000,'images/pomidory.jpg'],
+    ['Картофель 3шт',10000,'images/kartofel.jpg'],
+    ['Говяжья вырезка',30000,'images/govyazhya_vyrezka.jpg'],
+    ['Куриное филе',22000,'images/kurinoe_file.jpg'],
+    ['Куриные крылышки',22000,'images/krylyshki.jpg'],
+    ['Бомбочка',30000,'images/bombochka.jpg'],
+    ['Говядина отбивная',35000,'images/otbivnaya.jpg'],
+    ['Котлеты 1шт',30000,'images/kotlety.jpg'],
+    ['Чебурек на мангале',30000,'images/cheburek.jpg'],
+    ['Колбаски острые 1шт',17000,'images/kolbaski_ostrye.jpg'],
+    ['Овощной микс',15000,'images/ovoshchnoy_mix.jpg'],
+    ['Колбаски молочные 1шт',17000,'images/kolbaski_molochnye.jpg'],
+    ['Грибы шампиньоны',15000,'images/griby.jpg']
+],
+
+national:[
+    ['Жиз Биз Баранина 1кг',260000,'images/jiz_biz_baranina_1kg.jpg'],
+    ['Жиз Биз Баранина 0.5кг',130000,'images/jiz_biz_baranina_05kg.jpg'],
+    ['Жиз Биз из вырезки 1кг',300000,'images/jiz_biz_vyrezka_1kg.jpg'],
+    ['Жиз Биз из вырезки 0.5кг',150000,'images/jiz_biz_vyrezka_05kg.jpg']
+],
+
+grill:[
+    ['Стейк куриный',100000,'images/steyk_kuriniy.jpg'],
+    ['Стейк Тибон 100гр',20000,'images/steyk_tibon.jpg'],
+    ['Стейк Вагури',200000,'images/steyk_vaguri.jpg'],
+    ['Баранина с грибами 0.5кг',100000,'images/baranina_griby_05kg.jpg'],
+    ['Баранина с грибами 1кг',200000,'images/baranina_griby_1kg.jpg'],
+    ['Говяжья вырезка с овощами 0.5кг',180000,'images/vyrezka_ovoshi_05kg.jpg'],
+    ['Говяжья вырезка с овощами 1кг',360000,'images/vyrezka_ovoshi_1kg.jpg']
+],
+
+first:[
+    ['Шурпа',35000,'images/shurpa.jpg'],
+    ['Щи зеленые',25000,'images/shi_zelenye.jpg'],
+    ['Борщ со сметаной',25000,'images/borsh.jpg'],
+    ['Гужа',25000,'images/guzha.jpg'],
+    ['Мастава',25000,'images/mastava.jpg']
+],
+
+drinks:[
+    ['Чай черный / зеленый',5000,'images/chay.jpg'],
+    ['Чай с лимоном',15000,'images/chay_limon.jpg'],
+    ['Fanta 1L',14000,'images/fanta_1l.jpg'],
+    ['Fanta 1.5L',18000,'images/fanta_15l.jpg'],
+    ['Coca Cola 1L',14000,'images/coca_cola_1l.jpg'],
+    ['Coca Cola 1.5L',18000,'images/coca_cola_15l.jpg'],
+    ['Сок Сочная Долина 1L',20000,'images/sok_sochnaya_dolina.png'],
+    ['Pepsi 1L',14000,'images/pepsi_1l.jpg'],
+    ['Pepsi 1.5L',18000,'images/pepsi_15l.jpg'],
+    ['Минеральная вода Chortoq 0.5L',15000,'images/chortoq_gaz_05l.jpg'],
+    ['Вода без газа Chortoq 1L',6000,'images/chortoq_1l.jpg'],
+    ['Вода без газа Chortoq 1.5L',8000,'images/chortoq_15l.jpg'],
+    ['Лимонад Тархун 0.5L',12000,'images/tarhun_05l.jpg'],
+    ['Лимонад Дюшес 0.5L',12000,'images/dyushes_05l.jpg'],
+    ['Энергетик Saber 0.5L',15000,'images/saber_05l.jpg']
+],
+
+bread:[
+    ['Лепешка Чап чак 1шт',10000,'images/lepyoshka.jpg']
+]
+};
+
+function renderProducts(){
+    products.innerHTML='';
+    MENU[category]
+    .filter(i=>i[0].toLowerCase().includes(searchValue))
+    .forEach(([n,p,img])=>{
+        cart[n]=cart[n]||0;
+        products.innerHTML+=`
+        <div class="card">
+            <div class="img">
+                <img src="${img || 'logo.png'}">
+            </div>
+            <div class="price">${p} сум</div>
+            <div class="name">${n}</div>
+            <div class="counter">
+                <button onclick="chg('${n}',-1,this)">−</button>
+                <span id="c_${n}">${cart[n]}</span>
+                <button onclick="chg('${n}',1,this)">+</button>
+            </div>
+        </div>`;
+    });
+    upd();
+}
+
+function toggleSearch(){search.style.display=search.style.display==='block'?'none':'block';}
+search.oninput=e=>{searchValue=e.target.value.toLowerCase();renderProducts();};
+
+function renderCats(){
+    cats.innerHTML='';
+    for(let k in CATS[lang]){
+        cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k]}</button>`;
+    }
+}
+
+function chg(n,v){
+    cart[n]=Math.max(0,(cart[n]||0)+v);
+    document.getElementById('c_'+n).innerText=cart[n];
+    upd();
+}
+function upd(){let s=0;for(let k in cart)s+=cart[k]*price(k);total.innerText=s;}
+function price(n){for(let c in MENU)for(let i of MENU[c])if(i[0]==n)return i[1];}
+
+function applyLang(){
+    btnDelivery.innerText=TEXT[lang].delivery;
+    btnPickup.innerText=TEXT[lang].pickup;
+    address.placeholder=TEXT[lang].address;
+    phone.placeholder=TEXT[lang].phone;
+    cartTitle.innerText=TEXT[lang].cart;
+    orderBtn.innerText=TEXT[lang].order;
+    comment.placeholder=TEXT[lang].comment;
+    search.placeholder=TEXT[lang].search;
+    renderCats();renderProducts();
+}
+
+function setLang(l,b){
+    lang=l;
+    document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    applyLang();
+}
+function setType(t,b){
+    type=t;
+    document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    address.style.display=t==='pickup'?'none':'block';
+}
+function setPayment(p){
+    payment=p;
+    payCash.classList.toggle('active',p==='cash');
+    payClick.classList.toggle('active',p==='click');
+}
+
+function sendOrder(){
+    const order={};
+    for(let k in cart) if(cart[k]>0) order[k]=cart[k];
+    Telegram.WebApp.sendData(JSON.stringify({order,phone:phone.value||'—',comment:comment.value||'—',delivery:type,address:type==='delivery'?address.value:'Самовывоз',total:total.innerText,payment,lang}));
+    Telegram.WebApp.close();
+}
+
+applyLang();
+</script>
+
+</body>
+</html>
