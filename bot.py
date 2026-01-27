@@ -2,99 +2,55 @@ import asyncio
 import logging
 import json
 import os
-import html
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
-from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.client.default import DefaultBotProperties
-
-from aiohttp import web  # ✅ добавили мини-сервер для BotHost
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.getenv("BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("TOKEN")
-ADMIN_ID = 6013591658
-WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
-CHANNEL_ID = "@Kadimasignaturetaste"
-
-PORT = int(os.getenv("PORT", "3000"))  # ✅ BotHost даёт PORT=3000
-
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
-    raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN в BotHost.")
+    raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN на BotHost.")
+
+ADMIN_ID = 6013591658
+CHANNEL_ID = "@Kadimasignaturetaste"
+WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
-def esc(x) -> str:
-    return html.escape(str(x)) if x is not None else "—"
-
-
-def menu_kb() -> InlineKeyboardMarkup:
+# --- Кнопка WebApp (только для лички/группы, НЕ для канала)
+def kb_webapp() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(
-                text="🍽 Открыть меню / Menyuni ochish / Open menu",
-                web_app=WebAppInfo(url=WEBAPP_URL)
-            )]
+            [InlineKeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]
         ]
     )
 
 
-START_TEXT_3LANG = (
-    "👋 Добро пожаловать в <b>KADIMA Cafe</b>!\n"
-    "Нажмите кнопку ниже, чтобы открыть меню.\n\n"
-    "👋 <b>KADIMA Cafe</b> ga xush kelibsiz!\n"
-    "Menyuni ochish uchun pastdagi tugmani bosing.\n\n"
-    "👋 Welcome to <b>KADIMA Cafe</b>!\n"
-    "Tap the button below to open the menu."
-)
-
-POST_TEXT_3LANG = (
-    "🍽 <b>KADIMA Cafe</b>\n"
-    "Нажмите кнопку ниже, чтобы открыть меню.\n\n"
-    "🍽 <b>KADIMA Cafe</b>\n"
-    "Menyuni ochish uchun pastdagi tugmani bosing.\n\n"
-    "🍽 <b>KADIMA Cafe</b>\n"
-    "Tap the button below to open the menu."
-)
-
-
-# ✅ Проверка, что бот жив
-@dp.message(Command("health"))
-async def health(message: types.Message):
-    await message.answer("✅ Бот живой и отвечает.")
-
-
-# ✅ Команда чтобы проверить реальный Telegram ID
-@dp.message(Command("id"))
-async def cmd_id(message: types.Message):
-    await message.answer(
-        f"🆔 Ваш Telegram ID: <code>{message.from_user.id}</code>\n"
-        f"chat_id: <code>{message.chat.id}</code>"
+# --- Кнопка для канала (только URL, иначе BUTTON_TYPE_INVALID)
+def kb_channel_url() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🍽 Открыть меню", url=WEBAPP_URL)]
+        ]
     )
 
 
-# ✅ Проверка: может ли бот писать админу
-@dp.message(Command("ping_admin"))
-async def ping_admin(message: types.Message):
-    if message.from_user.id != ADMIN_ID:
-        return await message.answer("⛔️ Нет доступа.")
-
-    try:
-        await bot.send_message(ADMIN_ID, "✅ TEST: бот может писать админу.")
-        await message.answer("✅ Ок: сообщение админу отправилось.")
-    except Exception as e:
-        logging.exception("PING_ADMIN ERROR")
-        await message.answer(f"❌ Не могу написать админу: <code>{esc(e)}</code>")
-
-
+# /start в личке
 @dp.message(CommandStart())
 async def start(message: types.Message):
-    await message.answer(START_TEXT_3LANG, reply_markup=menu_kb())
+    await message.answer(
+        "👋 Добро пожаловать в <b>KADIMA Cafe</b>\n"
+        "Нажмите кнопку ниже, чтобы открыть меню:",
+        reply_markup=kb_webapp()
+    )
 
 
+# Команда для админа — публикуем пост в канал
 @dp.message(Command("post_menu"))
 async def post_menu(message: types.Message):
     if message.from_user.id != ADMIN_ID:
@@ -103,65 +59,48 @@ async def post_menu(message: types.Message):
     try:
         await bot.send_message(
             chat_id=CHANNEL_ID,
-            text=POST_TEXT_3LANG,
-            reply_markup=menu_kb()
+            text="🍽 <b>KADIMA Cafe</b>\nНажмите кнопку ниже, чтобы открыть меню:",
+            reply_markup=kb_channel_url()  # ВАЖНО: только url=
         )
-        await message.answer("✅ Пост с кнопкой меню отправлен в канал.")
+        await message.answer("✅ Пост с кнопкой отправлен в канал.")
     except Exception as e:
         logging.exception("CHANNEL POST ERROR")
         await message.answer(
             "❌ Не смог отправить в канал.\n"
             "Проверь:\n"
-            "1) бот добавлен админом в канал\n"
+            "1) бот админ канала\n"
             "2) есть право 'Публиковать сообщения'\n"
-            "3) правильно указан CHANNEL_ID\n\n"
-            f"Ошибка: <code>{esc(e)}</code>"
+            "3) CHANNEL_ID указан правильно\n\n"
+            f"Ошибка: <code>{e}</code>"
         )
 
 
-# 🔥 ПРИЕМ ДАННЫХ ИЗ WEBAPP
+# Приём данных из WebApp
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # ✅ Быстрый ответ клиенту, чтобы видеть факт прихода данных
-    try:
-        await message.answer("✅ Данные заказа получены ботом. Обрабатываю…")
-    except Exception:
-        pass
-
+    # Безопасный парс JSON
     try:
         data = json.loads(raw) if raw else {}
+        if not isinstance(data, dict):
+            data = {"_raw": raw}
     except Exception:
         data = {"_raw": raw}
 
-    order = data.get("order") if isinstance(data, dict) else None
+    order = data.get("order", {})
     if not isinstance(order, dict):
         order = {}
 
-    total = str(data.get("total", "0")) if isinstance(data, dict) else "0"
-    payment = str(data.get("payment", "не указано")) if isinstance(data, dict) else "не указано"
-    order_type = str(data.get("type", "не указано")) if isinstance(data, dict) else "не указано"
-    address = str(data.get("address", "—")) if isinstance(data, dict) else "—"
-    phone = str(data.get("phone", "—")) if isinstance(data, dict) else "—"
-    comment = str(data.get("comment", "—")) if isinstance(data, dict) else "—"
-
-    tg = data.get("tg", {}) if isinstance(data, dict) else {}
-    if not isinstance(tg, dict):
-        tg = {}
-    tg_id = tg.get("id", "")
-    tg_username = tg.get("username", "")
-    tg_first_name = tg.get("first_name", "")
+    total = str(data.get("total", "0"))
+    payment = str(data.get("payment", "не указано"))
+    order_type = str(data.get("type", "не указано"))
+    address = str(data.get("address", "—"))
+    phone = str(data.get("phone", "—"))
+    comment = str(data.get("comment", "—"))
 
     admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
-
-    if tg_id or tg_username or tg_first_name:
-        admin_text += (
-            f"👤 <b>Клиент:</b> {esc(tg_first_name)}\n"
-            f"🆔 <b>ID:</b> {esc(tg_id)}\n"
-            f"🔗 <b>Username:</b> @{esc(tg_username) if tg_username else '—'}\n\n"
-        )
 
     if not order:
         admin_text += "⚠️ Корзина пустая\n"
@@ -170,60 +109,49 @@ async def webapp_data(message: types.Message):
             try:
                 q = int(qty)
                 if q > 0:
-                    admin_text += f"• {esc(item)} × {q}\n"
+                    admin_text += f"• {item} × {q}\n"
             except Exception:
                 if str(qty).strip():
-                    admin_text += f"• {esc(item)} × {esc(qty)}\n"
+                    admin_text += f"• {item} × {qty}\n"
 
     admin_text += (
-        f"\n💰 <b>Сумма:</b> {esc(total)} сум"
-        f"\n🚚 <b>Тип:</b> {esc(order_type)}"
-        f"\n💳 <b>Оплата:</b> {esc(payment)}"
-        f"\n📍 <b>Адрес:</b> {esc(address)}"
-        f"\n📞 <b>Телефон:</b> {esc(phone)}"
-        f"\n💬 <b>Комментарий:</b> {esc(comment)}"
+        f"\n💰 <b>Сумма:</b> {total} сум"
+        f"\n🚚 <b>Тип:</b> {order_type}"
+        f"\n💳 <b>Оплата:</b> {payment}"
+        f"\n📍 <b>Адрес:</b> {address}"
+        f"\n📞 <b>Телефон:</b> {phone}"
+        f"\n💬 <b>Комментарий:</b> {comment}"
     )
 
+    # Если пришёл сырой текст (не JSON) — добавим для диагностики
+    if "_raw" in data:
+        admin_text += f"\n\n🧩 <b>RAW:</b>\n<code>{data['_raw']}</code>"
+
+    # Отправка админу (админ должен был нажать /start у бота хотя бы 1 раз)
+    admin_sent = False
     try:
         await bot.send_message(ADMIN_ID, admin_text)
-        await message.answer("✅ <b>Ваш заказ принят!</b>\nС вами скоро свяжется оператор 📞")
-    except Exception as e:
+        admin_sent = True
+    except Exception:
         logging.exception("ADMIN SEND ERROR")
-        await message.answer(
-            "✅ <b>Ваш заказ принят!</b>\n"
-            "⚠️ Но админу не удалось отправить уведомление.\n"
-            f"Причина: <code>{esc(e)}</code>"
-        )
 
-
-# ✅ Мини HTTP сервер для BotHost (чтобы не было SIGTERM)
-async def start_http_server():
-    async def ok(request):
-        return web.Response(text="OK")
-
-    app = web.Application()
-    app.router.add_get("/", ok)
-    app.router.add_get("/health", ok)
-
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, host="0.0.0.0", port=PORT)
-    await site.start()
-
-    logging.info(f"HTTP server started on 0.0.0.0:{PORT}")
-    # держим задачу живой
-    while True:
-        await asyncio.sleep(3600)
+    # Ответ клиенту
+    try:
+        if admin_sent:
+            await message.answer("✅ <b>Ваш заказ принят!</b>\nС вами скоро свяжется оператор 📞")
+        else:
+            await message.answer(
+                "✅ <b>Ваш заказ принят!</b>\n"
+                "⚠️ Но оператору не удалось получить уведомление автоматически.\n"
+                "Пожалуйста, позвоните в кафе."
+            )
+    except Exception:
+        logging.exception("CLIENT ANSWER ERROR")
 
 
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
-
-    # ✅ запускаем сервер и polling параллельно
-    await asyncio.gather(
-        start_http_server(),
-        dp.start_polling(bot)
-    )
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
