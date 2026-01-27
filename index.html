@@ -1,798 +1,190 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<title>KADIMA</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
-
-<style>
-:root{
-  --bg:#F8F3E9;
-  --terracotta:#C76B2F;
-  --gold:#D4A017;
-  --green:#1F4D3A;
-  --meat:#8B1E1E;
-
-  --stroke: rgba(199,107,47,.35);
-  --stroke-strong: rgba(199,107,47,.50);
-  --inner: rgba(255,255,255,.70);
-  --shadow: rgba(120,70,20,.10);
-  --shadow-strong: rgba(120,70,20,.18);
-
-  --r-lg:24px;
-  --r-md:22px;
-  --r-pill:28px;
-}
-
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{
-  margin:0;
-  font-family:'Montserrat',sans-serif;
-  background:var(--bg);
-  color:#2b2b2b;
-  padding-bottom:88px;
-}
-
-.header{
-  padding:16px 12px 26px;
-  background:linear-gradient(135deg,var(--terracotta),var(--gold));
-  color:white;
-  box-shadow:0 6px 18px rgba(120,70,20,.25);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  text-align:center;
-}
-.header img{position:absolute;left:12px;width:110px;}
-
-.brand-title{font-family:'Lobster',cursive;font-size:36px;}
-.brand-sub{font-weight:800;font-size:15px;}
-
-.brand-phone{position:relative; z-index:50; pointer-events:auto;}
-.brand-phone a{
-  color:white;
-  text-decoration:none;
-  font-size:15px;
-  font-weight:700;
-  position:relative;
-  z-index:51;
-  pointer-events:auto;
-  cursor:pointer;
-}
-
-.search-btn{
-  position:absolute;
-  right:14px;
-  bottom:10px;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  z-index:60;
-
-  color:#333;
-  background:#fffdf9;
-  border:1px solid var(--stroke);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
-  transition:.15s;
-}
-.search-btn:active{transform:scale(.97);}
-
-.langs,.types,.payments{
-  display:flex;
-  gap:12px;
-  padding:12px;
-  justify-content:center;
-}
-
-.btn{
-  padding:12px 20px;
-  border-radius:var(--r-pill);
-  font-weight:700;
-  min-width:120px;
-  text-align:center;
-  cursor:pointer;
-  transition:.15s;
-
-  border:1px solid var(--stroke);
-  background:#fffdf9;
-  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
-}
-.btn:active{transform:scale(.98);}
-.btn.active{
-  background:linear-gradient(135deg,var(--terracotta),var(--gold));
-  color:white;
-  border:1px solid rgba(255,255,255,.55);
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.45), 0 8px 18px var(--shadow-strong);
-}
-
-.input{
-  margin:8px auto;
-  display:block;
-  padding:14px;
-  width:85%;
-  border-radius:var(--r-md);
-  font-size:15px;
-
-  border:1px solid var(--stroke);
-  background:#fffdf9;
-  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
-  outline:none;
-  transition:.15s;
-}
-.input:focus{
-  border-color: var(--stroke-strong);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);
-}
-
-.categories{
-  display:flex;
-  gap:12px;
-  padding:14px;
-  overflow-x:auto;
-  scroll-behavior:smooth;
-}
-
-.products{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px;
-  padding:12px;
-}
-
-.card{
-  border-radius:var(--r-lg);
-  padding:12px;
-  text-align:center;
-  background:#fffdf9;
-  border:1px solid var(--stroke);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
-  transition:.15s;
-}
-.card:active{transform:scale(.99);}
-
-.img{height:76px;display:flex;align-items:center;justify-content:center;}
-.img img{max-width:62px;opacity:.9;}
-
-.price{font-weight:800;color:var(--meat);margin-top:6px;}
-.price small{font-weight:700;opacity:.75;margin-left:4px;}
-
-.counter{display:flex;justify-content:center;gap:10px;margin-top:8px;align-items:center;}
-.counter button{
-  width:32px;
-  height:32px;
-  border-radius:50%;
-  cursor:pointer;
-
-  border:1px solid rgba(255,255,255,.6);
-  background:var(--green);
-  color:white;
-  font-size:16px;
-  box-shadow:0 6px 14px var(--shadow);
-  transition:.15s;
-}
-.counter button:active{transform:scale(.96);}
-
-.cart{
-  background:#fffdf9;
-  margin:12px;
-  padding:16px;
-  border-radius:var(--r-lg);
-  border:1px solid var(--stroke);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
-}
-
-textarea.input{height:90px;}
-
-.order-btn{
-  width:100%;
-  padding:18px;
-  margin-top:14px;
-  border-radius:var(--r-lg);
-  cursor:pointer;
-  color:white;
-  font-size:17px;
-  font-weight:800;
-
-  border:1px solid rgba(255,255,255,.55);
-  background:linear-gradient(135deg,var(--green),#2e7d32);
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 10px 22px rgba(31,77,58,.18);
-  transition:.15s;
-}
-.order-btn:active{transform:scale(.99);}
-
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
-.popup.show{opacity:1;pointer-events:auto;}
-.popup-box{
-  background:white;
-  padding:26px;
-  border-radius:var(--r-lg);
-  text-align:center;
-  font-weight:700;
-  border:1px solid var(--stroke);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px rgba(0,0,0,.10);
-}
-
-.search-wrap{
-  width:85%;
-  margin:8px auto;
-  position:relative;
-  display:none;
-  z-index:70;
-}
-.search-wrap.show{display:block;}
-.search-wrap input{width:100%;margin:0;padding-right:44px;}
-.search-clear{
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-
-  border:1px solid var(--stroke);
-  background:#fffdf9;
-  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
-  transition:.15s;
-}
-.search-clear:active{transform:translateY(-50%) scale(.96);}
-
-.search-title{
-  width:85%;
-  margin:10px auto 0;
-  font-weight:800;
-  opacity:.9;
-  display:none;
-  z-index:70;
-  position:relative;
-}
-.search-title.show{display:block;}
-
-mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
-
-.quick-filters{
-  display:flex;
-  gap:10px;
-  padding:0 12px 10px;
-  overflow-x:auto;
-}
-.qbtn{
-  border:1px solid var(--stroke);
-  background:#fffdf9;
-  box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
-  border-radius:999px;
-  padding:10px 14px;
-  font-weight:800;
-  cursor:pointer;
-  white-space:nowrap;
-  transition:.15s;
-}
-.qbtn:active{transform:scale(.98);}
-
-.popular-wrap{width:100%;padding:4px 12px 6px;}
-.popular-title{width:100%;font-weight:900;padding:8px 2px 10px;display:flex;align-items:center;gap:8px;}
-.popular-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;}
-.pop-card{
-  min-width:150px;
-  border-radius:var(--r-lg);
-  padding:10px;
-  background:#fffdf9;
-  border:1px solid var(--stroke);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
-  cursor:pointer;
-  transition:.15s;
-  position:relative;
-}
-.pop-card:active{transform:scale(.99);}
-.pop-img{
-  height:74px;
-  border-radius:18px;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(199,107,47,.08);
-}
-.pop-img img{width:100%;height:100%;object-fit:cover;}
-.pop-name{font-weight:900;margin-top:8px;}
-.pop-price{font-weight:900;color:var(--meat);margin-top:4px;}
-.pop-badge{position:absolute;left:10px;top:10px;font-size:18px;pointer-events:none;}
-
-.sticky-checkout{
-  position:fixed;
-  left:0; right:0; bottom:0;
-  padding:10px 12px;
-  background:rgba(248,243,233,.88);
-  backdrop-filter: blur(10px);
-  z-index:999;
-  border-top:1px solid rgba(199,107,47,.25);
-}
-.sticky-inner{
-  max-width:520px;
-  margin:0 auto;
-  border-radius:18px;
-  padding:10px 12px;
-  background:#fffdf9;
-  border:1px solid var(--stroke);
-  box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px rgba(120,70,20,.12);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.sticky-sum{font-weight:900;line-height:1.1;}
-.sticky-sum small{display:block;font-weight:800;opacity:.75;margin-top:2px;}
-.sticky-btn{
-  padding:12px 14px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.55);
-  background:linear-gradient(135deg,var(--green),#2e7d32);
-  color:#fff;
-  font-weight:900;
-  cursor:pointer;
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.20), 0 10px 22px rgba(31,77,58,.18);
-  transition:.15s;
-  white-space:nowrap;
-}
-.sticky-btn:active{transform:scale(.99);}
-
-@media (hover:hover){
-  .btn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
-  .card:hover{transform:translateY(-2px); box-shadow: inset 0 0 0 2px var(--inner), 0 12px 26px rgba(120,70,20,.16);}
-  .qbtn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
-  .search-btn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
-  .sticky-btn:hover{box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 14px 28px rgba(31,77,58,.22);}
-  .pop-card:hover{transform:translateY(-2px);}
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-  <img src="logo.png" onerror="this.src='logo.png'">
-  <div>
-    <div class="brand-title">KADIMA</div>
-    <div class="brand-sub">Signature taste</div>
-    <div class="brand-phone">
-      <a href="tel:+998905389999" onclick="callPhone(event)">+998 90 538 99 99</a>
-    </div>
-  </div>
-  <div class="search-btn" onclick="toggleSearch()">🔍</div>
-</div>
-
-<div class="search-title" id="searchTitle">Результаты поиска</div>
-<div class="search-wrap" id="searchWrap">
-  <input id="searchInput" class="input" placeholder="Поиск блюда..." oninput="searchProducts()" onkeydown="onSearchKey(event)">
-  <div class="search-clear" onclick="clearSearch()" title="Очистить">✖</div>
-</div>
-
-<div class="langs">
-  <button class="btn active" onclick="setLang('ru',this)">RU</button>
-  <button class="btn" onclick="setLang('uz',this)">UZ</button>
-  <button class="btn" onclick="setLang('en',this)">EN</button>
-</div>
-
-<div class="popular-wrap" id="popularWrap">
-  <div class="popular-title" id="popularTitle">🔥 Популярное</div>
-  <div class="popular-row" id="popularRow"></div>
-</div>
-
-<div class="quick-filters" id="quickFilters"></div>
-
-<div class="types">
-  <button class="btn active" id="btnDelivery" onclick="setType('delivery',this)"></button>
-  <button class="btn" id="btnPickup" onclick="setType('pickup',this)"></button>
-</div>
-
-<input id="address" class="input">
-<input id="phone" class="input">
-
-<div class="categories" id="cats"></div>
-<div class="products" id="products"></div>
-
-<div class="cart">
-  <b id="cartTitle"></b>: <span id="total">0</span> сум
-  <textarea id="comment" class="input"></textarea>
-  <div class="payments">
-    <button class="btn active" id="payCash" onclick="setPayment('cash')"></button>
-    <button class="btn" id="payClick" onclick="setPayment('click')"></button>
-  </div>
-  <button class="order-btn" id="orderBtn" onclick="sendOrder()"></button>
-</div>
-
-<div class="popup" id="popup"><div class="popup-box">✅ Заказ принят!</div></div>
-
-<div class="sticky-checkout">
-  <div class="sticky-inner">
-    <div class="sticky-sum">
-      <span id="stickyTotal">0</span> <small>сум</small>
-    </div>
-    <button class="sticky-btn" onclick="sendOrder()" id="stickyOrder">Оформить заказ</button>
-  </div>
-</div>
-
-<script>
-Telegram.WebApp.ready();
-
-/* ✅ звонок из WebApp */
-function callPhone(e){
-  try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
-  const tel = "tel:+998905389999";
-  try{
-    if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === "function"){
-      Telegram.WebApp.openLink(tel);
-      return;
-    }
-  }catch(_){}
-  try{ window.location.href = tel; }catch(_){}
-}
-
-const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
-const tg_username = tgUser.username || "";
-const tg_first_name = tgUser.first_name || "";
-const tg_id = tgUser.id || "";
-
-let lang='ru',category='salads',type='delivery',payment='cash',cart={};
-
-const TEXT={
-  ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'✍️ Комментарий к заказу',cash:'💵 Наличные',click:'💳 CLICK',results:'Результаты поиска',popular:'🔥 Популярное'},
-  uz:{delivery:'🚚 Yetkazish',pickup:'🏃 Olib ketish',address:'📍 Manzil',phone:'📞 Telefon',cart:'🛒 Savat',order:'Buyurtma berish',comment:'✍️ Izoh',cash:'💵 Naqd',click:'💳 CLICK',results:'Qidiruv natijalari',popular:'🔥 Ommabop'},
-  en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'✍️ Comment',cash:'💵 Cash',click:'💳 CLICK',results:'Search results',popular:'🔥 Popular'}
-};
-
-const CATS={
-  ru:{salads:'🥗 Салаты',sauce:'🥣 Соус',first:'🍜 Первые блюда',hot:'🍲 Горячие блюда',garnish:'🍟 Гарнир',drinks:'🥤 Напитки'},
-  uz:{salads:'🥗 Salatlar',sauce:'🥣 Souslar',first:'🍜 Birinchi taomlar',hot:'🍲 Issiq taomlar',garnish:'🍟 Garnir',drinks:'🥤 Ichimliklar'},
-  en:{salads:'🥗 Salads',sauce:'🥣 Sauces',first:'🍜 First dishes',hot:'🍲 Hot dishes',garnish:'🍟 Side dishes',drinks:'🥤 Drinks'}
-};
-
-/* ✅ МЕНЮ */
-const MENU = {
-  salads:[
-    ['Весенний',25000,'logo.png'],
-    ['Осенний',30000,'logo.png'],
-    ['Греческий',40000,'logo.png'],
-    ['Вечо',45000,'logo.png'],
-    ['Крабовый',40000,'logo.png'],
-    ['Элитный',45000,'logo.png'],
-    ['Смак',40000,'logo.png'],
-    ['Салат с руколлой',45000,'logo.png'],
-    ['Винегрет',40000,'logo.png'],
-    ['Цезарь классический',45000,'logo.png'],
-    ['Оливье',40000,'logo.png'],
-    ['Свежий',25000,'logo.png']
-  ],
-  sauce:[
-    ['Чалоп',10000,'logo.png'],
-    ['Соус из помидоров',5000,'logo.png']
-  ],
-  first:[
-    ['Шурпа',40000,'logo.png'],
-    ['Пельмени',40000,'logo.png'],
-    ['Лагман',40000,'logo.png'],
-    ['Суп бульон',20000,'logo.png']
-  ],
-  hot:[
-    ['Манты 1шт',10000,'logo.png'],
-    ['Плов 0.5',50000,'logo.png'],
-    ['Халиса',80000,'logo.png'],
-    ['Курутоб',80000,'logo.png'],
-    ['Жаренный Лагман',50000,'logo.png']
-  ],
-  garnish:[
-    ['Фри',20000,'logo.png']
-  ],
-  drinks:[
-    ['Coca Cola 1.5L',20000,'logo.png'],
-    ['Fanta 1.5L',20000,'logo.png'],
-    ['Pepsi 1.5L',20000,'logo.png'],
-    ['Сок в ассортименте 1L',20000,'logo.png'],
-    ['Вода газ\\без газа Chertoq 1.5L',8000,'logo.png'],
-    ['Чай Зеленый\\ Черный',5000,'logo.png'],
-    ['Чай с лимоном',15000,'logo.png'],
-    ['Кофе растворимый черный',10000,'logo.png']
-  ]
-};
-
-/* ✅ Популярное */
-const POPULAR = [
-  ['Плов 0.5',50000,'logo.png'],
-  ['Манты 1шт',10000,'logo.png'],
-  ['Шурпа',40000,'logo.png'],
-  ['Цезарь классический',45000,'logo.png']
-];
-
-function formatSum(x){
-  const n = Number(x) || 0;
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
-}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-function highlight(name, q){
-  const n = escapeHtml(name);
-  if(!q) return n;
-  const idx = n.toLowerCase().indexOf(q.toLowerCase());
-  if(idx === -1) return n;
-  const before = n.slice(0, idx);
-  const mid = n.slice(idx, idx + q.length);
-  const after = n.slice(idx + q.length);
-  return `${before}<mark>${mid}</mark>${after}`;
-}
-
-function loadSaved(){
-  const a = localStorage.getItem('kadima_address') || '';
-  const p = localStorage.getItem('kadima_phone') || '';
-  if(a && !address.value) address.value = a;
-  if(p && !phone.value) phone.value = p;
-}
-function bindSave(){
-  address.addEventListener('input', ()=>localStorage.setItem('kadima_address', address.value));
-  phone.addEventListener('input', ()=>localStorage.setItem('kadima_phone', phone.value));
-}
-
-function setLang(l,b){
-  lang=l;
-  document.querySelectorAll('.langs .btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  applyLang();
-}
-
-function applyLang(){
-  btnDelivery.innerText=TEXT[lang].delivery;
-  btnPickup.innerText=TEXT[lang].pickup;
-  address.placeholder=TEXT[lang].address;
-  phone.placeholder=TEXT[lang].phone;
-  cartTitle.innerText=TEXT[lang].cart;
-  orderBtn.innerText=TEXT[lang].order;
-  stickyOrder.innerText=TEXT[lang].order;
-  comment.placeholder=TEXT[lang].comment;
-  payCash.innerText=TEXT[lang].cash;
-  payClick.innerText=TEXT[lang].click;
-  searchTitle.innerText = TEXT[lang].results;
-  popularTitle.innerText = TEXT[lang].popular;
-
-  renderPopular();
-  renderQuickFilters();
-  renderCats();
-  renderProducts();
-  updateTotal();
-}
-
-function renderPopular(){
-  popularRow.innerHTML = '';
-  POPULAR.forEach(([n,p,img])=>{
-    cart[n]=cart[n]||0;
-    popularRow.innerHTML += `
-      <div class="pop-card" onclick="addPopular('${n}')">
-        <div class="pop-badge">🔥</div>
-        <div class="pop-img"><img src="${img}" onerror="this.src='logo.png'"></div>
-        <div class="pop-name">${escapeHtml(n)}</div>
-        <div class="pop-price">${formatSum(p)} <small>сум</small></div>
-      </div>
-    `;
-  });
-}
-function addPopular(n){
-  chg(n, 1);
-  if(isSearchOpen()) closeSearch();
-}
-
-function renderQuickFilters(){
-  const keys = ['salads','hot','first','drinks'];
-  quickFilters.innerHTML = '';
-  keys.forEach(k=>{
-    if(!MENU[k]) return;
-    quickFilters.innerHTML += `<button class="qbtn" onclick="pickCategory('${k}')">${CATS[lang][k]}</button>`;
-  });
-}
-function pickCategory(k){
-  if(isSearchOpen()) closeSearch();
-  category = k;
-  renderCats();
-  renderProducts();
-}
-
-function renderCats(){
-  cats.innerHTML='';
-  for(let k in MENU){
-    cats.innerHTML+=`<button class="btn ${k===category?'active':''}" onclick="category='${k}';renderCats();renderProducts()">${CATS[lang][k] || k}</button>`;
-  }
-  setTimeout(()=>{
-    const active = cats.querySelector('.btn.active');
-    if(active && active.scrollIntoView){
-      active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-    }
-  }, 50);
-}
-
-function cardHTML(n,p,img,q=''){
-  const nameHtml = highlight(n, q);
-  return `<div class="card">
-    <div class="img"><img src="${img}" onerror="this.src='logo.png'"></div>
-    <div>${nameHtml}</div>
-    <div class="price">${formatSum(p)} <small>сум</small></div>
-    <div class="counter">
-      <button onclick="chg('${n}',-1)">−</button>
-      <span id="c_${n}">${cart[n]||0}</span>
-      <button onclick="chg('${n}',1)">+</button>
-    </div>
-  </div>`;
-}
-
-function renderProducts(){
-  products.innerHTML='';
-  MENU[category].forEach(([n,p,img])=>{
-    cart[n]=cart[n]||0;
-    products.innerHTML+=cardHTML(n,p,img,'');
-  });
-}
-
-function chg(n,v){
-  cart[n]=Math.max(0,(cart[n]||0)+v);
-  const el = document.getElementById('c_'+n);
-  if(el) el.innerText=cart[n];
-  updateTotal();
-}
-
-function price(n){
-  for(let c in MENU) for(let i of MENU[c]) if(i[0]==n) return i[1];
-  return 0;
-}
-
-function updateTotal(){
-  let s=0;
-  for(let k in cart) s += (cart[k]||0) * price(k);
-  total.innerText = formatSum(s);
-  stickyTotal.innerText = formatSum(s);
-}
-
-function setType(t,b){
-  if(isSearchOpen()) closeSearch();
-  type=t;
-  document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-}
-function setPayment(p){
-  payment=p;
-  payCash.classList.toggle('active',p==='cash');
-  payClick.classList.toggle('active',p==='click');
-}
-
-/* ✅ Поиск */
-function isSearchOpen(){ return searchWrap.classList.contains('show'); }
-
-function toggleSearch(){
-  if(isSearchOpen()) closeSearch();
-  else openSearch();
-}
-function openSearch(){
-  searchWrap.classList.add('show');
-  searchTitle.classList.add('show');
-  cats.style.display = 'none';
-  quickFilters.style.display = 'none';
-  popularWrap.style.display = 'none';
-  searchInput.value = '';
-  searchInput.focus();
-  searchProducts();
-}
-function closeSearch(){
-  searchWrap.classList.remove('show');
-  searchTitle.classList.remove('show');
-  cats.style.display = '';
-  quickFilters.style.display = '';
-  popularWrap.style.display = '';
-  searchInput.value = '';
-  renderProducts();
-}
-function clearSearch(){
-  closeSearch();
-}
-
-function onSearchKey(e){
-  if(e.key === 'Enter'){
-    closeSearch();
-  }
-}
-
-function searchProducts(){
-  const q = (searchInput.value || '').trim().toLowerCase();
-  products.innerHTML='';
-
-  if(!q){
-    MENU[category].forEach(([n,p,img])=>{
-      cart[n]=cart[n]||0;
-      products.innerHTML += cardHTML(n,p,img,'');
-    });
-    return;
-  }
-
-  for(let c in MENU){
-    MENU[c].forEach(([n,p,img])=>{
-      if(String(n).toLowerCase().includes(q)){
-        cart[n]=cart[n]||0;
-        products.innerHTML += cardHTML(n,p,img,q);
-      }
-    });
-  }
-}
-
-/* ✅ авто-закрытие поиска при клике вне него */
-document.addEventListener('click', (e)=>{
-  if(!isSearchOpen()) return;
-  const t = e.target;
-  const insideSearch = searchWrap.contains(t) || searchTitle.contains(t);
-  const onBtn = t.closest && t.closest('.search-btn');
-  if(!insideSearch && !onBtn){
-    closeSearch();
-  }
-}, true);
-
-/* ✅✅✅ ID заказа: вместо KD- делаем KAD- */
-function genOrderId(){
-  const t = Date.now().toString(36);
-  const r = Math.random().toString(36).slice(2, 8);
-  return ("KAD-" + t + "-" + r).toUpperCase();
-}
-function calcTotalNum(){
-  let s = 0;
-  for (const k in cart) s += (Number(cart[k] || 0) * price(k));
-  return s;
-}
-
-/* ✅ отправляем только выбранные позиции (qty > 0) */
-function sendOrder(){
-  popup.classList.add('show');
-
-  const cleanOrder = {};
-  for (const k in cart) {
-    const q = Number(cart[k] || 0);
-    if (q > 0) cleanOrder[k] = q;
-  }
-
-  if (Object.keys(cleanOrder).length === 0) {
-    popup.classList.remove('show');
-    alert(lang === 'ru' ? 'Корзина пустая' : (lang === 'uz' ? 'Savat bo‘sh' : 'Cart is empty'));
-    return;
-  }
-
-  const payload = {
-    tg: { id: tg_id, username: tg_username, first_name: tg_first_name },
-    order: cleanOrder,
-    total: total.innerText,
-    total_num: calcTotalNum(),
-    payment,
-    type,
-    address: address.value,
-    phone: phone.value,
-    comment: comment.value,
-    order_id: genOrderId(),
-    created_at: new Date().toISOString()
-  };
-
-  setTimeout(()=>{
-    Telegram.WebApp.sendData(JSON.stringify(payload));
-    Telegram.WebApp.close();
-  }, 700);
-}
-
-loadSaved();
-bindSave();
-applyLang();
-</script>
-</body>
-</html>
+import asyncio
+import logging
+import json
+import os
+
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import CommandStart, Command
+from aiogram.client.default import DefaultBotProperties
+from aiogram.types import (
+    ReplyKeyboardMarkup, KeyboardButton, WebAppInfo,
+    InlineKeyboardMarkup, InlineKeyboardButton
+)
+
+logging.basicConfig(level=logging.INFO)
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
+
+BOT_USERNAME = "kadima_cafe_bot"  # без @
+ADMIN_ID = 6013591658
+CHANNEL_ID = "@Kadimasignaturetaste"
+WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
+
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
+dp = Dispatcher()
+
+
+def kb_webapp_reply() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]],
+        resize_keyboard=True
+    )
+
+
+def kb_channel_deeplink() -> InlineKeyboardMarkup:
+    deeplink = f"https://t.me/{BOT_USERNAME}?startapp=menu"
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🍽 Открыть меню", url=deeplink)]
+    ])
+
+
+def welcome_text() -> str:
+    return (
+        "✨ <b>KADIMA Cafe</b>\n\n"
+        "Нажмите кнопку ниже, чтобы открыть меню.\n"
+        "✅ После заказа мы пришлём подтверждение сюда."
+    )
+
+
+@dp.message(CommandStart())
+async def start(message: types.Message):
+    await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
+
+
+@dp.message(Command("startapp"))
+async def startapp(message: types.Message):
+    await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
+
+
+@dp.message(Command("post_menu"))
+async def post_menu(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        return await message.answer("⛔️ Нет доступа.")
+
+    text = "🍽 <b>KADIMA Cafe</b>\nНажмите кнопку ниже, чтобы открыть меню:"
+    try:
+        sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_channel_deeplink())
+        try:
+            await bot.pin_chat_message(CHANNEL_ID, sent.message_id, disable_notification=True)
+            await message.answer("✅ Пост отправлен в канал и закреплён.")
+        except Exception:
+            await message.answer(
+                "✅ Пост отправлен в канал.\n"
+                "⚠️ Не удалось закрепить — дай боту право «Закреплять сообщения» или закрепи вручную."
+            )
+    except Exception as e:
+        logging.exception("CHANNEL POST ERROR")
+        await message.answer(f"❌ Ошибка отправки в канал: <code>{e}</code>")
+
+
+def fmt_sum(n: int) -> str:
+    try:
+        n = int(n)
+    except Exception:
+        n = 0
+    return f"{n:,}".replace(",", " ")
+
+
+def tg_label(u: types.User) -> str:
+    return f"@{u.username}" if u.username else u.full_name
+
+
+def clean_str(v) -> str:
+    return ("" if v is None else str(v)).strip()
+
+
+@dp.message(F.web_app_data)
+async def webapp_data(message: types.Message):
+    raw = message.web_app_data.data
+    logging.info(f"WEBAPP DATA RAW: {raw}")
+
+    await message.answer("✅ <b>Получил заказ.</b> Обрабатываю…")
+
+    try:
+        data = json.loads(raw) if raw else {}
+        if not isinstance(data, dict):
+            data = {"_raw": raw}
+    except Exception:
+        data = {"_raw": raw}
+
+    order = data.get("order", {})
+    if not isinstance(order, dict):
+        order = {}
+
+    total_num = int(data.get("total_num", 0) or 0)
+    total_str = clean_str(data.get("total")) or fmt_sum(total_num)
+
+    payment = clean_str(data.get("payment")) or "—"
+    order_type = clean_str(data.get("type")) or "—"
+    address = clean_str(data.get("address")) or "—"
+    phone = clean_str(data.get("phone")) or "—"
+    comment = clean_str(data.get("comment"))
+    order_id = clean_str(data.get("order_id")) or "—"
+
+    pay_label = {"cash": "💵 Наличные", "click": "💳 Безнал (CLICK)"} .get(payment, payment)
+    type_label = {"delivery": "🚚 Доставка", "pickup": "🏃 Самовывоз"} .get(order_type, order_type)
+
+    lines = []
+    for item, qty in order.items():
+        try:
+            q = int(qty)
+        except Exception:
+            q = qty
+        if isinstance(q, int) and q <= 0:
+            continue
+        lines.append(f"• {item} × {q}")
+    if not lines:
+        lines = ["⚠️ Корзина пустая"]
+
+    # ✅ АДМИНУ — БЕЗ ДАТЫ/ВРЕМЕНИ
+    admin_text = (
+        "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n"
+        f"🆔 <b>{order_id}</b>\n\n"
+        + "\n".join(lines) +
+        f"\n\n💰 <b>Сумма:</b> {total_str} сум"
+        f"\n🚚 <b>Тип:</b> {type_label}"
+        f"\n💳 <b>Оплата:</b> {pay_label}"
+        f"\n📍 <b>Адрес:</b> {address}"
+        f"\n📞 <b>Телефон:</b> {phone}"
+        f"\n👤 <b>Telegram:</b> {tg_label(message.from_user)}"
+    )
+    if comment:
+        admin_text += f"\n💬 <b>Комментарий:</b> {comment}"
+
+    try:
+        await bot.send_message(ADMIN_ID, admin_text)
+    except Exception as e:
+        logging.exception("ADMIN SEND ERROR")
+        return await message.answer(
+            "⚠️ Заказ получил, но админу отправить не смог.\n"
+            f"Ошибка: <code>{e}</code>"
+        )
+
+    # ✅ КЛИЕНТУ — его заказ (без даты/времени)
+    client_text = (
+        "✅ <b>Ваш заказ принят!</b>\n"
+        "🙏 Спасибо за заказ!\n\n"
+        f"🆔 <b>{order_id}</b>\n\n"
+        "<b>Состав заказа:</b>\n"
+        + "\n".join(lines) +
+        f"\n\n💰 <b>Сумма:</b> {total_str} сум"
+        f"\n🚚 <b>Тип:</b> {type_label}"
+        f"\n💳 <b>Оплата:</b> {pay_label}"
+        f"\n📍 <b>Адрес:</b> {address}"
+        f"\n📞 <b>Телефон:</b> {phone}"
+    )
+    if comment:
+        client_text += f"\n💬 <b>Комментарий:</b> {comment}"
+
+    await message.answer(client_text)
+
+
+async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
