@@ -2,6 +2,7 @@ import asyncio
 import logging
 import json
 import os
+import time
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
@@ -22,11 +23,26 @@ BOT_USERNAME = "kadima_cafe_bot"  # без @
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
 
-# ⚠️ ВАЖНО: добавили версию, чтобы Telegram не кешировал старый сайт
+# ⚠️ ВАЖНО: версия, чтобы Telegram не кешировал старый сайт
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/?v=3"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
+
+# ====== АНТИ-ДУБЛЬ START ======
+_last_start: dict[int, float] = {}
+
+def allow_start(user_id: int, ttl: float = 2.0) -> bool:
+    """
+    Telegram иногда вызывает /start два раза при очистке истории + заходе через канал.
+    Эта защита пропускает только первый вызов в течение ttl секунд.
+    """
+    now = time.time()
+    prev = _last_start.get(user_id, 0.0)
+    if now - prev < ttl:
+        return False
+    _last_start[user_id] = now
+    return True
 
 
 # ====== КНОПКИ ======
@@ -56,11 +72,15 @@ def welcome_text() -> str:
 # ====== /start ======
 @dp.message(CommandStart())
 async def start(message: types.Message):
+    if not allow_start(message.from_user.id, ttl=2.0):
+        return
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
 
 @dp.message(Command("startapp"))
 async def startapp(message: types.Message):
+    if not allow_start(message.from_user.id, ttl=2.0):
+        return
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
 
