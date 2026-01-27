@@ -51,7 +51,6 @@ body{
 .brand-title{font-family:'Lobster',cursive;font-size:36px;}
 .brand-sub{font-weight:800;font-size:15px;}
 
-/* ✅ Телефон кликабельный + поверх */
 .brand-phone{position:relative; z-index:50; pointer-events:auto;}
 .brand-phone a{
   color:white;
@@ -461,6 +460,7 @@ const CATS={
   en:{salads:'🥗 Salads',sauce:'🥣 Sauces',first:'🍜 First dishes',hot:'🍲 Hot dishes',garnish:'🍟 Side dishes',drinks:'🥤 Drinks'}
 };
 
+/* ✅ МЕНЮ */
 const MENU = {
   salads:[
     ['Весенний',25000,'logo.png'],
@@ -508,6 +508,7 @@ const MENU = {
   ]
 };
 
+/* ✅ Популярное */
 const POPULAR = [
   ['Плов 0.5',50000,'logo.png'],
   ['Манты 1шт',10000,'logo.png'],
@@ -741,11 +742,11 @@ document.addEventListener('click', (e)=>{
   }
 }, true);
 
-/* ✅✅✅ ДОБАВЛЕНО: order_id, created_at, total_num */
+/* ✅✅✅ ID заказа: вместо KD- делаем KAD- */
 function genOrderId(){
   const t = Date.now().toString(36);
   const r = Math.random().toString(36).slice(2, 8);
-  return ("KD-" + t + "-" + r).toUpperCase();
+  return ("KAD-" + t + "-" + r).toUpperCase();
 }
 function calcTotalNum(){
   let s = 0;
