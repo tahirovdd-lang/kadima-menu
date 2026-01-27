@@ -13,6 +13,7 @@ from aiogram.types import (
 
 logging.basicConfig(level=logging.INFO)
 
+# ====== НАСТРОЙКИ ======
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
@@ -20,12 +21,15 @@ if not BOT_TOKEN:
 BOT_USERNAME = "kadima_cafe_bot"  # без @
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
-WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
+
+# ⚠️ ВАЖНО: добавили версию, чтобы Telegram не кешировал старый сайт
+WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/?v=3"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
+# ====== КНОПКИ ======
 def kb_webapp_reply() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]],
@@ -35,11 +39,12 @@ def kb_webapp_reply() -> ReplyKeyboardMarkup:
 
 def kb_channel_deeplink() -> InlineKeyboardMarkup:
     deeplink = f"https://t.me/{BOT_USERNAME}?startapp=menu"
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🍽 Открыть меню", url=deeplink)]
-    ])
+    return InlineKeyboardMarkup(
+        inline_keyboard=[[InlineKeyboardButton(text="🍽 Открыть меню", url=deeplink)]]
+    )
 
 
+# ====== ТЕКСТ ======
 def welcome_text() -> str:
     return (
         "✨ <b>KADIMA Cafe</b>\n\n"
@@ -48,6 +53,7 @@ def welcome_text() -> str:
     )
 
 
+# ====== /start ======
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
@@ -58,6 +64,7 @@ async def startapp(message: types.Message):
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
 
+# ====== ПОСТ В КАНАЛ ======
 @dp.message(Command("post_menu"))
 async def post_menu(message: types.Message):
     if message.from_user.id != ADMIN_ID:
@@ -79,6 +86,7 @@ async def post_menu(message: types.Message):
         await message.answer(f"❌ Ошибка отправки в канал: <code>{e}</code>")
 
 
+# ====== ВСПОМОГАТЕЛЬНЫЕ ======
 def fmt_sum(n: int) -> str:
     try:
         n = int(n)
@@ -95,6 +103,7 @@ def clean_str(v) -> str:
     return ("" if v is None else str(v)).strip()
 
 
+# ====== ЗАКАЗ ИЗ WEBAPP ======
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
@@ -104,10 +113,8 @@ async def webapp_data(message: types.Message):
 
     try:
         data = json.loads(raw) if raw else {}
-        if not isinstance(data, dict):
-            data = {"_raw": raw}
     except Exception:
-        data = {"_raw": raw}
+        data = {}
 
     order = data.get("order", {})
     if not isinstance(order, dict):
@@ -123,8 +130,8 @@ async def webapp_data(message: types.Message):
     comment = clean_str(data.get("comment"))
     order_id = clean_str(data.get("order_id")) or "—"
 
-    pay_label = {"cash": "💵 Наличные", "click": "💳 Безнал (CLICK)"} .get(payment, payment)
-    type_label = {"delivery": "🚚 Доставка", "pickup": "🏃 Самовывоз"} .get(order_type, order_type)
+    pay_label = {"cash": "💵 Наличные", "click": "💳 Безнал (CLICK)"}.get(payment, payment)
+    type_label = {"delivery": "🚚 Доставка", "pickup": "🏃 Самовывоз"}.get(order_type, order_type)
 
     lines = []
     for item, qty in order.items():
@@ -138,7 +145,7 @@ async def webapp_data(message: types.Message):
     if not lines:
         lines = ["⚠️ Корзина пустая"]
 
-    # ✅ АДМИНУ — БЕЗ ДАТЫ/ВРЕМЕНИ
+    # ====== АДМИН ======
     admin_text = (
         "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n"
         f"🆔 <b>{order_id}</b>\n\n"
@@ -153,16 +160,9 @@ async def webapp_data(message: types.Message):
     if comment:
         admin_text += f"\n💬 <b>Комментарий:</b> {comment}"
 
-    try:
-        await bot.send_message(ADMIN_ID, admin_text)
-    except Exception as e:
-        logging.exception("ADMIN SEND ERROR")
-        return await message.answer(
-            "⚠️ Заказ получил, но админу отправить не смог.\n"
-            f"Ошибка: <code>{e}</code>"
-        )
+    await bot.send_message(ADMIN_ID, admin_text)
 
-    # ✅ КЛИЕНТУ — его заказ (без даты/времени)
+    # ====== КЛИЕНТ ======
     client_text = (
         "✅ <b>Ваш заказ принят!</b>\n"
         "🙏 Спасибо за заказ!\n\n"
@@ -181,6 +181,7 @@ async def webapp_data(message: types.Message):
     await message.answer(client_text)
 
 
+# ====== ЗАПУСК ======
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
