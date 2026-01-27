@@ -455,35 +455,12 @@ const TEXT={
   en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'✍️ Comment',cash:'💵 Cash',click:'💳 CLICK',results:'Search results',popular:'🔥 Popular'}
 };
 
-/* ✅✅✅ КАТЕГОРИИ: только те, что ты дал */
 const CATS={
-  ru:{
-    salads:'🥗 Салаты',
-    sauce:'🥣 Соус',
-    first:'🍜 Первые блюда',
-    hot:'🍲 Горячие блюда',
-    garnish:'🍟 Гарнир',
-    drinks:'🥤 Напитки'
-  },
-  uz:{
-    salads:'🥗 Salatlar',
-    sauce:'🥣 Souslar',
-    first:'🍜 Birinchi taomlar',
-    hot:'🍲 Issiq taomlar',
-    garnish:'🍟 Garnir',
-    drinks:'🥤 Ichimliklar'
-  },
-  en:{
-    salads:'🥗 Salads',
-    sauce:'🥣 Sauces',
-    first:'🍜 First dishes',
-    hot:'🍲 Hot dishes',
-    garnish:'🍟 Side dishes',
-    drinks:'🥤 Drinks'
-  }
+  ru:{salads:'🥗 Салаты',sauce:'🥣 Соус',first:'🍜 Первые блюда',hot:'🍲 Горячие блюда',garnish:'🍟 Гарнир',drinks:'🥤 Напитки'},
+  uz:{salads:'🥗 Salatlar',sauce:'🥣 Souslar',first:'🍜 Birinchi taomlar',hot:'🍲 Issiq taomlar',garnish:'🍟 Garnir',drinks:'🥤 Ichimliklar'},
+  en:{salads:'🥗 Salads',sauce:'🥣 Sauces',first:'🍜 First dishes',hot:'🍲 Hot dishes',garnish:'🍟 Side dishes',drinks:'🥤 Drinks'}
 };
 
-/* ✅✅✅ МЕНЮ: только то, что ты дал (всем ставлю logo.png, чтобы ничего не искало лишних фото) */
 const MENU = {
   salads:[
     ['Весенний',25000,'logo.png'],
@@ -531,7 +508,6 @@ const MENU = {
   ]
 };
 
-/* ✅ Популярное (из твоего списка) */
 const POPULAR = [
   ['Плов 0.5',50000,'logo.png'],
   ['Манты 1шт',10000,'logo.png'],
@@ -616,7 +592,6 @@ function addPopular(n){
 }
 
 function renderQuickFilters(){
-  /* ✅ быстрые фильтры под новые категории */
   const keys = ['salads','hot','first','drinks'];
   quickFilters.innerHTML = '';
   keys.forEach(k=>{
@@ -766,6 +741,18 @@ document.addEventListener('click', (e)=>{
   }
 }, true);
 
+/* ✅✅✅ ДОБАВЛЕНО: order_id, created_at, total_num */
+function genOrderId(){
+  const t = Date.now().toString(36);
+  const r = Math.random().toString(36).slice(2, 8);
+  return ("KD-" + t + "-" + r).toUpperCase();
+}
+function calcTotalNum(){
+  let s = 0;
+  for (const k in cart) s += (Number(cart[k] || 0) * price(k));
+  return s;
+}
+
 /* ✅ отправляем только выбранные позиции (qty > 0) */
 function sendOrder(){
   popup.classList.add('show');
@@ -782,19 +769,24 @@ function sendOrder(){
     return;
   }
 
+  const payload = {
+    tg: { id: tg_id, username: tg_username, first_name: tg_first_name },
+    order: cleanOrder,
+    total: total.innerText,
+    total_num: calcTotalNum(),
+    payment,
+    type,
+    address: address.value,
+    phone: phone.value,
+    comment: comment.value,
+    order_id: genOrderId(),
+    created_at: new Date().toISOString()
+  };
+
   setTimeout(()=>{
-    Telegram.WebApp.sendData(JSON.stringify({
-      tg: { id: tg_id, username: tg_username, first_name: tg_first_name },
-      order: cleanOrder,
-      total: total.innerText,
-      payment,
-      type,
-      address: address.value,
-      phone: phone.value,
-      comment: comment.value
-    }));
+    Telegram.WebApp.sendData(JSON.stringify(payload));
     Telegram.WebApp.close();
-  },1200);
+  }, 700);
 }
 
 loadSaved();
