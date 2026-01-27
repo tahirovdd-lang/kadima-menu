@@ -2,6 +2,7 @@ import asyncio
 import logging
 import json
 import os
+from datetime import datetime
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
@@ -18,43 +19,38 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
 
+BOT_USERNAME = os.getenv("BOT_USERNAME")  # например: KadimaSignatureBot (без @)
+if not BOT_USERNAME:
+    raise RuntimeError("❌ BOT_USERNAME не найден. Добавь переменную окружения BOT_USERNAME (без @).")
+
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
 
-# ✅ твой WebApp URL
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
-
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
 
 def kb_webapp_reply() -> ReplyKeyboardMarkup:
-    # ✅ синяя кнопка внизу чата (именно она нужна для web_app_data)
+    # кнопка в личке — лучший вариант для гарантированного web_app_data
     return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]
-        ],
+        keyboard=[[KeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]],
         resize_keyboard=True
     )
 
 
-def kb_webapp_inline() -> InlineKeyboardMarkup:
-    # ✅ кнопка внутри сообщения (подходит для канала)
+def kb_channel_deeplink() -> InlineKeyboardMarkup:
+    # ✅ Кнопка для канала: открывает бота и WebApp через startapp (это критично)
+    deeplink = f"https://t.me/{BOT_USERNAME}?startapp=menu"
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]
+        [InlineKeyboardButton(text="🍽 Открыть меню", url=deeplink)]
     ])
 
 
-def welcome_text(from_channel: bool) -> str:
-    if from_channel:
-        return (
-            "✨ <b>KADIMA Cafe</b>\n\n"
-            "Нажмите кнопку ниже, чтобы открыть меню.\n"
-            "После оформления заказа вы получите подтверждение здесь ✅"
-        )
+def welcome_text() -> str:
     return (
-        "✨ <b>Добро пожаловать в KADIMA Cafe!</b>\n\n"
+        "✨ <b>KADIMA Cafe</b>\n\n"
         "Нажмите кнопку ниже, чтобы открыть меню.\n"
         "✅ После заказа мы пришлём подтверждение сюда."
     )
@@ -62,11 +58,15 @@ def welcome_text(from_channel: bool) -> str:
 
 @dp.message(CommandStart())
 async def start(message: types.Message, command: CommandObject):
+    # startapp=menu тоже попадает сюда как args
     args = (command.args or "").strip().lower()
-    await message.answer(
-        welcome_text(from_channel=(args == "menu")),
-        reply_markup=kb_webapp_reply()
-    )
+
+    # Всегда показываем кнопку WebApp в личке
+    await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
+
+    # Если пришли из канала через startapp=menu — можно дополнительно подсказать
+    if "menu" in args:
+        await message.answer("✅ Меню откроется по кнопке ниже. После оформления заказа он придёт сюда.")
 
 
 @dp.message(Command("post_menu"))
@@ -80,7 +80,8 @@ async def post_menu(message: types.Message):
     )
 
     try:
-        sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_webapp_inline())
+        sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_channel_deeplink())
+        # закреп — по желанию, но бот должен быть админом канала с правом закрепа
         try:
             await bot.pin_chat_message(CHANNEL_ID, sent.message_id, disable_notification=True)
             await message.answer("✅ Пост отправлен в канал и закреплён.")
@@ -119,10 +120,9 @@ async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # ✅ Если это сообщение не появляется у клиента — значит web_app_data не приходит вообще
+    # Если эта строка НЕ появляется у клиента — значит web_app_data не приходит
     await message.answer("✅ <b>Получил заказ из меню.</b>\nОбрабатываю…")
 
-    # Парсим JSON
     try:
         data = json.loads(raw) if raw else {}
         if not isinstance(data, dict):
@@ -144,7 +144,7 @@ async def webapp_data(message: types.Message):
     comment = str(data.get("comment", "—"))
 
     order_id = str(data.get("order_id", "—"))
-    created_at = str(data.get("created_at", "—"))
+    created_at = str(data.get("created_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
     pay_label = {"cash": "💵 Наличные", "click": "💳 CLICK"}.get(payment, payment)
     type_label = {"delivery": "🚚 Доставка", "pickup": "🏃 Самовывоз"}.get(order_type, order_type)
@@ -183,7 +183,11 @@ async def webapp_data(message: types.Message):
         logging.info("ORDER SENT TO ADMIN")
     except Exception as e:
         logging.exception("ADMIN SEND ERROR")
-        await message.answer(f"⚠️ Не смог отправить админу: <code>{e}</code>")
+        await message.answer(
+            "⚠️ Я получил заказ, но не смог отправить админу.\n"
+            "Проверь, что админ запускал бота (/start) и бот не заблокирован.\n"
+            f"Ошибка: <code>{e}</code>"
+        )
         return
 
     # Финальный ответ клиенту
