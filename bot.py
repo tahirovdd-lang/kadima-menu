@@ -24,7 +24,6 @@ dp = Dispatcher()
 
 
 def kb_channel_to_bot() -> InlineKeyboardMarkup:
-    # ведём в бота: /start menu
     url = f"https://t.me/{BOT_USERNAME}?start=menu"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🍽 Открыть меню", url=url)]
@@ -63,8 +62,6 @@ async def post_menu(message: types.Message):
 
     try:
         sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_channel_to_bot())
-
-        # попытка закрепа (нужно право боту: Закреплять сообщения)
         try:
             await bot.pin_chat_message(CHANNEL_ID, sent.message_id, disable_notification=True)
             await message.answer("✅ Пост отправлен в канал и закреплён.")
@@ -73,7 +70,6 @@ async def post_menu(message: types.Message):
                 "✅ Пост отправлен в канал.\n"
                 "⚠️ Не удалось закрепить автоматически — дай боту право «Закреплять сообщения» или закрепи вручную."
             )
-
     except Exception as e:
         logging.exception("CHANNEL POST ERROR")
         await message.answer(f"❌ Ошибка отправки в канал: <code>{e}</code>")
@@ -81,35 +77,19 @@ async def post_menu(message: types.Message):
 
 @dp.message(Command("ping_admin"))
 async def ping_admin(message: types.Message):
-    """
-    Диагностика: может ли бот писать админу.
-    """
     if message.from_user.id != ADMIN_ID:
         return await message.answer("⛔️ Нет доступа.")
-
     try:
         await bot.send_message(ADMIN_ID, "✅ Тест: бот может отправлять сообщения админу.")
         await message.answer("✅ Проверка пройдена: админу отправлено сообщение.")
     except Exception as e:
         logging.exception("PING ADMIN ERROR")
-        await message.answer(
-            "❌ Бот НЕ может написать админу.\n"
-            "Причины:\n"
-            "1) админ не нажал /start у бота\n"
-            "2) админ заблокировал бота\n\n"
-            f"Ошибка: <code>{e}</code>"
-        )
+        await message.answer(f"❌ Не смог написать админу. Ошибка: <code>{e}</code>")
 
 
-# ✅ ДОБАВЛЕНО: тест заказа без WebApp
 @dp.message(Command("test_order"))
 async def test_order(message: types.Message):
-    """
-    Тест: бот отвечает клиенту и пробует отправить админу.
-    Помогает понять, проблема в WebApp или в отправке админу.
-    """
     await message.answer("✅ <b>Тест</b>: клиентское сообщение работает.")
-
     try:
         await bot.send_message(
             ADMIN_ID,
@@ -119,11 +99,7 @@ async def test_order(message: types.Message):
         await message.answer("✅ <b>Тест</b>: админу отправлено сообщение.")
     except Exception as e:
         logging.exception("TEST_ORDER ADMIN SEND ERROR")
-        await message.answer(
-            "❌ <b>Тест</b>: не смог написать админу.\n"
-            "Проверь: админ нажал /start у бота и не блокировал бота.\n\n"
-            f"Ошибка: <code>{e}</code>"
-        )
+        await message.answer(f"❌ <b>Тест</b>: не смог написать админу. Ошибка: <code>{e}</code>")
 
 
 @dp.message(Command("debug_webapp"))
@@ -132,18 +108,24 @@ async def debug_webapp(message: types.Message):
         "🧩 <b>Проверка WebApp</b>\n\n"
         "Чтобы бот получил заказ, WebApp должен вызвать:\n"
         "<code>Telegram.WebApp.sendData(JSON.stringify({...}))</code>\n\n"
-        "Если после оформления заказа бот НЕ отвечает — значит sendData не вызывается "
-        "или отправляется не JSON."
+        "Сделайте тестовый заказ.\n"
+        "Если бот не пришлёт сообщение «Получил данные из WebApp ✅» — значит sendData не вызывается."
     )
 
 
-# ✅ Приём данных из WebApp
 @dp.message(F.web_app_data)
 async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # 1) парсим данные максимально безопасно
+    # ✅ СРАЗУ подтверждаем клиенту факт прихода данных
+    # Если этого сообщения нет — web_app_data не приходит вообще
+    try:
+        await message.answer("✅ <b>Получил данные из WebApp.</b>\nОбрабатываю заказ…")
+    except Exception:
+        logging.exception("CLIENT ACK ERROR")
+
+    # Парсим JSON безопасно
     try:
         data = json.loads(raw) if raw else {}
         if not isinstance(data, dict):
@@ -162,11 +144,10 @@ async def webapp_data(message: types.Message):
     phone = str(data.get("phone", "—"))
     comment = str(data.get("comment", "—"))
 
-    # 2) собираем текст админу
     admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
 
     if not order:
-        admin_text += "⚠️ Корзина пустая или не пришла (order пуст)\n"
+        admin_text += "⚠️ order пустой (WebApp не передал корзину)\n"
     else:
         for item, qty in order.items():
             try:
@@ -190,25 +171,18 @@ async def webapp_data(message: types.Message):
     if "_raw" in data:
         admin_text += f"\n\n🧩 <b>RAW:</b>\n<code>{data['_raw']}</code>"
 
-    # 3) сначала ответ клиенту (чтобы он точно видел подтверждение)
-    try:
-        await message.answer("✅ <b>Ваш заказ принят!</b>\nС вами скоро свяжется оператор 📞")
-    except Exception:
-        logging.exception("CLIENT ANSWER ERROR")
-
-    # 4) отправляем админу
+    # Отправляем админу
     try:
         await bot.send_message(ADMIN_ID, admin_text)
         logging.info("ORDER SENT TO ADMIN")
-    except Exception as e:
+    except Exception:
         logging.exception("ADMIN SEND ERROR")
-        try:
-            await message.answer(
-                "⚠️ Не удалось автоматически отправить заказ оператору.\n"
-                "Пожалуйста, позвоните в кафе или напишите нам."
-            )
-        except Exception:
-            pass
+
+    # Финальный ответ клиенту
+    try:
+        await message.answer("✅ <b>Ваш заказ принят!</b>\nС вами скоро свяжется оператор 📞")
+    except Exception:
+        logging.exception("CLIENT FINAL ANSWER ERROR")
 
 
 async def main():
