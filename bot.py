@@ -101,6 +101,31 @@ async def ping_admin(message: types.Message):
         )
 
 
+# ✅ ДОБАВЛЕНО: тест заказа без WebApp
+@dp.message(Command("test_order"))
+async def test_order(message: types.Message):
+    """
+    Тест: бот отвечает клиенту и пробует отправить админу.
+    Помогает понять, проблема в WebApp или в отправке админу.
+    """
+    await message.answer("✅ <b>Тест</b>: клиентское сообщение работает.")
+
+    try:
+        await bot.send_message(
+            ADMIN_ID,
+            "✅ <b>Тест-заказ</b> дошёл админу.\n"
+            f"Клиент: {message.from_user.full_name} (id: <code>{message.from_user.id}</code>)"
+        )
+        await message.answer("✅ <b>Тест</b>: админу отправлено сообщение.")
+    except Exception as e:
+        logging.exception("TEST_ORDER ADMIN SEND ERROR")
+        await message.answer(
+            "❌ <b>Тест</b>: не смог написать админу.\n"
+            "Проверь: админ нажал /start у бота и не блокировал бота.\n\n"
+            f"Ошибка: <code>{e}</code>"
+        )
+
+
 @dp.message(Command("debug_webapp"))
 async def debug_webapp(message: types.Message):
     await message.answer(
@@ -177,7 +202,6 @@ async def webapp_data(message: types.Message):
         logging.info("ORDER SENT TO ADMIN")
     except Exception as e:
         logging.exception("ADMIN SEND ERROR")
-        # если админу не отправилось — скажем клиенту, что оператор может не увидеть
         try:
             await message.answer(
                 "⚠️ Не удалось автоматически отправить заказ оператору.\n"
