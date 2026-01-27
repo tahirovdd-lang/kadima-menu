@@ -227,7 +227,7 @@ textarea.input{height:90px;}
   margin:8px auto;
   position:relative;
   display:none;
-  z-index:70; /* ✅ чтобы не было “налезаний” */
+  z-index:70;
 }
 .search-wrap.show{display:block;}
 .search-wrap input{width:100%;margin:0;padding-right:44px;}
@@ -369,7 +369,6 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
     <div class="brand-title">KADIMA</div>
     <div class="brand-sub">Signature taste</div>
     <div class="brand-phone">
-      <!-- ✅ обработчик звонка -->
       <a href="tel:+998905389999" onclick="callPhone(event)">+998 90 538 99 99</a>
     </div>
   </div>
@@ -432,10 +431,7 @@ Telegram.WebApp.ready();
 
 /* ✅ звонок из WebApp */
 function callPhone(e){
-  try{
-    e.preventDefault();
-    e.stopPropagation();
-  }catch(_){}
+  try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
   const tel = "tel:+998905389999";
   try{
     if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === "function"){
@@ -459,26 +455,88 @@ const TEXT={
   en:{delivery:'🚚 Delivery',pickup:'🏃 Pickup',address:'📍 Address',phone:'📞 Phone',cart:'🛒 Cart',order:'Place order',comment:'✍️ Comment',cash:'💵 Cash',click:'💳 CLICK',results:'Search results',popular:'🔥 Popular'}
 };
 
+/* ✅✅✅ КАТЕГОРИИ: только те, что ты дал */
 const CATS={
-  ru:{salads:'🥗 Салаты',kebab:'🔥 Шашлык',national:'🍲 Национальные блюда',grill:'🥩 Блюда на мангале',first:'🍜 Первые блюда',drinks:'🥤 Напитки',bread:'🥖 Хлеб'},
-  uz:{salads:'🥗 Salatlar',kebab:'🔥 Shashlik',national:'🍲 Milliy taomlar',grill:'🥩 Mangal taomlari',first:'🍜 Birinchi taomlar',drinks:'🥤 Ichimliklar',bread:'🥖 Non'},
-  en:{salads:'🥗 Salads',kebab:'🔥 Kebab',national:'🍲 National dishes',grill:'🥩 Grill dishes',first:'🍜 First dishes',drinks:'🥤 Drinks',bread:'🥖 Bread'}
+  ru:{
+    salads:'🥗 Салаты',
+    sauce:'🥣 Соус',
+    first:'🍜 Первые блюда',
+    hot:'🍲 Горячие блюда',
+    garnish:'🍟 Гарнир',
+    drinks:'🥤 Напитки'
+  },
+  uz:{
+    salads:'🥗 Salatlar',
+    sauce:'🥣 Souslar',
+    first:'🍜 Birinchi taomlar',
+    hot:'🍲 Issiq taomlar',
+    garnish:'🍟 Garnir',
+    drinks:'🥤 Ichimliklar'
+  },
+  en:{
+    salads:'🥗 Salads',
+    sauce:'🥣 Sauces',
+    first:'🍜 First dishes',
+    hot:'🍲 Hot dishes',
+    garnish:'🍟 Side dishes',
+    drinks:'🥤 Drinks'
+  }
 };
 
+/* ✅✅✅ МЕНЮ: только то, что ты дал (всем ставлю logo.png, чтобы ничего не искало лишних фото) */
 const MENU = {
-  salads:[['Свежий',30000,'images/svejiy.jpg'],['Салат «Ачичук»',30000,'images/achichuk.png'],['Салат «Шакароп»',30000,'images/shakarop.png'],['Салат «Чирокчи»',30000,'images/chirokchi.png'],['Салат «Мясной»',35000,'images/myasnoy.jpg'],['Салат «Греческий»',40000,'images/grecheskiy.jpg'],['Салат «Мажнунтол»',30000,'images/mazhnuntol.jpg'],['Салат «Мужской каприз»',35000,'images/muzhskoy_kapriz.jpg'],['Салат «Дамский каприз»',35000,'images/damskiy_kapriz.jpg'],['Салат «Оливье»',30000,'images/olivye.jpg'],['Салат «Французский»',35000,'images/frantsuzskiy.jpg'],['Салат «Смак»',35000,'images/smak.jpg'],['Цезарь',35000,'images/cezar.jpg'],['Хрустящий баклажан',45000,'images/baklajan.jpg']],
-  kebab:[['Молотый',28000,'images/molotiy.jpg'],['Молотый микс',30000,'images/molotiy_mix.jpg'],['Кусковой баранина',30000,'images/kuskovoy_baranina.jpg'],['Рулет',30000,'images/rulet.jpg'],['Наполеон',30000,'images/napoleon.jpg'],['Корейка',40000,'images/koreyka.jpg'],['Быкин',40000,'images/bykin.jpg'],['Ребрышки (семечки)',30000,'images/rebryshki.jpg'],['Печень',22000,'images/pechen.jpg'],['Курдюк',30000,'images/kurdyuk.jpg'],['Помидоры 3шт',12000,'images/pomidory.jpg'],['Картофель 3шт',10000,'images/kartofel.jpg'],['Говяжья вырезка',30000,'images/govyazhya_vyrezka.jpg'],['Куриное филе',22000,'images/kurinoe_file.jpg'],['Куриные крылышки',22000,'images/krylyshki.jpg'],['Бомбочка',30000,'images/bombochka.jpg'],['Говядина отбивная',35000,'images/otbivnaya.jpg'],['Котлеты 1шт',30000,'images/kotlety.jpg'],['Чебурек на мангале',30000,'images/cheburek.jpg'],['Колбаски острые 1шт',17000,'images/kolbaski_ostrye.jpg'],['Овощной микс',15000,'images/ovoshchnoy_mix.jpg'],['Колбаски молочные 1шт',17000,'images/kolbaski_molochnye.jpg'],['Грибы шампиньоны',15000,'images/griby.jpg']],
-  national:[['Жиз Биз Баранина 1кг',260000,'images/jiz_biz_baranina_1kg.jpg'],['Жиз Биз Баранина 0.5кг',130000,'images/jiz_biz_baranina_05kg.jpg'],['Жиз Биз из вырезки 1кг',300000,'images/jiz_biz_vyrezka_1kg.jpg'],['Жиз Биз из вырезки 0.5кг',150000,'images/jiz_biz_vyrezka_05kg.jpg'],['Плов',50000,'images/plov.jpg'],['Манты',50000,'images/manty.jpg'],['Пельмени',50000,'images/pelmeni.jpg']],
-  grill:[['Стейк куриный',100000,'images/steyk_kuriniy.jpg'],['Стейк Тибон 100гр',20000,'images/steyk_tibon.jpg'],['Стейк Вагури',200000,'images/steyk_vaguri.jpg'],['Баранина с грибами 0.5кг',100000,'images/baranina_griby_05kg.jpg'],['Баранина с грибами 1кг',200000,'images/baranina_griby_1kg.jpg'],['Говяжья вырезка с овощами 0.5кг',180000,'images/vyrezka_ovoshi_05kg.jpg'],['Говяжья вырезка с овощами 1кг',360000,'images/vyrezka_ovoshi_1kg.jpg']],
-  first:[['Шурпа',50000,'images/shurpa.jpg'],['Щи зеленые',25000,'images/shi_zelenye.jpg'],['Борщ со сметаной',25000,'images/borsh.jpg'],['Гужа',25000,'images/guzha.jpg'],['Мастава',25000,'images/mastava.jpg']],
-  drinks:[['Чай черный / зеленый',5000,'images/chay.jpg'],['Чай с лимоном',15000,'images/chay_limon.jpg'],['Fanta 1L',14000,'images/fanta_1l.jpg'],['Fanta 1.5L',18000,'images/fanta_15l.jpg'],['Coca Cola 1L',14000,'images/coca_cola_1l.jpg'],['Coca Cola 1.5L',18000,'images/coca_cola_15l.jpg'],['Сок Сочная Долина 1L',20000,'images/sok_sochnaya_dolina.png'],['Pepsi 1L',14000,'images/pepsi_1l.jpg'],['Pepsi 1.5L',18000,'images/pepsi_15l.jpg'],['Минеральная вода Chortoq 0.5L',15000,'images/chortoq_gaz_05l.jpg'],['Вода без газа Chortoq 1L',6000,'images/chortoq_1l.jpg'],['Вода без газа Chortoq 1.5L',8000,'images/chortoq_15l.jpg'],['Лимонад Тархун 0.5L',12000,'images/tarhun_05l.jpg'],['Лимонад Дюшес 0.5L',12000,'images/dyushes_05l.jpg'],['Энергетик Saber 0.5L',15000,'images/saber_05l.jpg']]
+  salads:[
+    ['Весенний',25000,'logo.png'],
+    ['Осенний',30000,'logo.png'],
+    ['Греческий',40000,'logo.png'],
+    ['Вечо',45000,'logo.png'],
+    ['Крабовый',40000,'logo.png'],
+    ['Элитный',45000,'logo.png'],
+    ['Смак',40000,'logo.png'],
+    ['Салат с руколлой',45000,'logo.png'],
+    ['Винегрет',40000,'logo.png'],
+    ['Цезарь классический',45000,'logo.png'],
+    ['Оливье',40000,'logo.png'],
+    ['Свежий',25000,'logo.png']
+  ],
+  sauce:[
+    ['Чалоп',10000,'logo.png'],
+    ['Соус из помидоров',5000,'logo.png']
+  ],
+  first:[
+    ['Шурпа',40000,'logo.png'],
+    ['Пельмени',40000,'logo.png'],
+    ['Лагман',40000,'logo.png'],
+    ['Суп бульон',20000,'logo.png']
+  ],
+  hot:[
+    ['Манты 1шт',10000,'logo.png'],
+    ['Плов 0.5',50000,'logo.png'],
+    ['Халиса',80000,'logo.png'],
+    ['Курутоб',80000,'logo.png'],
+    ['Жаренный Лагман',50000,'logo.png']
+  ],
+  garnish:[
+    ['Фри',20000,'logo.png']
+  ],
+  drinks:[
+    ['Coca Cola 1.5L',20000,'logo.png'],
+    ['Fanta 1.5L',20000,'logo.png'],
+    ['Pepsi 1.5L',20000,'logo.png'],
+    ['Сок в ассортименте 1L',20000,'logo.png'],
+    ['Вода газ\\без газа Chertoq 1.5L',8000,'logo.png'],
+    ['Чай Зеленый\\ Черный',5000,'logo.png'],
+    ['Чай с лимоном',15000,'logo.png'],
+    ['Кофе растворимый черный',10000,'logo.png']
+  ]
 };
 
+/* ✅ Популярное (из твоего списка) */
 const POPULAR = [
-  ['Плов',50000,'images/plov.jpg'],
-  ['Манты',50000,'images/manty.jpg'],
-  ['Пельмени',50000,'images/pelmeni.jpg'],
-  ['Шурпа',50000,'images/shurpa.jpg']
+  ['Плов 0.5',50000,'logo.png'],
+  ['Манты 1шт',10000,'logo.png'],
+  ['Шурпа',40000,'logo.png'],
+  ['Цезарь классический',45000,'logo.png']
 ];
 
 function formatSum(x){
@@ -558,7 +616,8 @@ function addPopular(n){
 }
 
 function renderQuickFilters(){
-  const keys = ['kebab','salads','national','drinks'];
+  /* ✅ быстрые фильтры под новые категории */
+  const keys = ['salads','hot','first','drinks'];
   quickFilters.innerHTML = '';
   keys.forEach(k=>{
     if(!MENU[k]) return;
@@ -627,7 +686,7 @@ function updateTotal(){
 }
 
 function setType(t,b){
-  if(isSearchOpen()) closeSearch(); /* ✅ чтобы поиск не “висел” над кнопками */
+  if(isSearchOpen()) closeSearch();
   type=t;
   document.querySelectorAll('.types .btn').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
@@ -665,13 +724,11 @@ function closeSearch(){
   renderProducts();
 }
 function clearSearch(){
-  // ✅ полностью закрываем поиск, чтобы “плашка” не висела
   closeSearch();
 }
 
 function onSearchKey(e){
   if(e.key === 'Enter'){
-    // ✅ завершил поиск — закрываем
     closeSearch();
   }
 }
@@ -681,7 +738,6 @@ function searchProducts(){
   products.innerHTML='';
 
   if(!q){
-    // просто показываем текущую категорию (но всё ещё в режиме поиска)
     MENU[category].forEach(([n,p,img])=>{
       cart[n]=cart[n]||0;
       products.innerHTML += cardHTML(n,p,img,'');
@@ -710,18 +766,16 @@ document.addEventListener('click', (e)=>{
   }
 }, true);
 
-/* ✅✅✅ ИЗМЕНЕНО: отправляем только выбранные позиции (qty > 0), чтобы не превышать лимит Telegram */
+/* ✅ отправляем только выбранные позиции (qty > 0) */
 function sendOrder(){
   popup.classList.add('show');
 
-  // ✅ чистим корзину: убираем все блюда с 0
   const cleanOrder = {};
   for (const k in cart) {
     const q = Number(cart[k] || 0);
     if (q > 0) cleanOrder[k] = q;
   }
 
-  // ✅ если ничего не выбрано — не отправляем пустой заказ
   if (Object.keys(cleanOrder).length === 0) {
     popup.classList.remove('show');
     alert(lang === 'ru' ? 'Корзина пустая' : (lang === 'uz' ? 'Savat bo‘sh' : 'Cart is empty'));
