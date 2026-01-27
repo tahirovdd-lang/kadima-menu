@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from time import time
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart, Command
@@ -16,16 +17,29 @@ if not BOT_TOKEN:
 
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
-
-# ✅ юзернейм бота без @
-BOT_USERNAME = "kadima_cafe_bot"
+BOT_USERNAME = "kadima_cafe_bot"  # без @
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
+# --- антидубль (на 1 процесс)
+_recent = {}  # (user_id, key) -> timestamp
+
+def is_duplicate(user_id: int, key: str, ttl: int = 3) -> bool:
+    now = time()
+    k = (user_id, key)
+    last = _recent.get(k, 0)
+    if now - last < ttl:
+        return True
+    _recent[k] = now
+    # чистка старых
+    for kk, ts in list(_recent.items()):
+        if now - ts > 30:
+            _recent.pop(kk, None)
+    return False
+
 
 def kb_channel_to_bot() -> InlineKeyboardMarkup:
-    # Ведём людей из канала в бота: /start menu
     url = f"https://t.me/{BOT_USERNAME}?start=menu"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🍽 Открыть меню", url=url)]
@@ -43,7 +57,8 @@ def welcome_text() -> str:
 
 @dp.message(CommandStart())
 async def start(message: types.Message, command: CommandObject):
-    # args может быть "menu" (если пришли из канала), но текст можно оставить одинаковым
+    if is_duplicate(message.from_user.id, "start", ttl=3):
+        return
     await message.answer(welcome_text())
 
 
@@ -60,7 +75,6 @@ async def post_menu(message: types.Message):
     try:
         sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_channel_to_bot())
 
-        # Авто-закреп (нужно право боту: "Закреплять сообщения")
         try:
             await bot.pin_chat_message(CHANNEL_ID, sent.message_id, disable_notification=True)
             await message.answer("✅ Пост отправлен в канал и закреплён.")
