@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.client.default import DefaultBotProperties
+from aiogram.filters.command import CommandObject
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,6 +18,9 @@ if not BOT_TOKEN:
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
+
+# ✅ ТВОЙ БОТ (без @)
+BOT_USERNAME = "kadima_cafe_bot"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
@@ -31,18 +35,30 @@ def kb_webapp() -> InlineKeyboardMarkup:
     )
 
 
-# --- Кнопка для канала (только URL, иначе BUTTON_TYPE_INVALID)
-def kb_channel_url() -> InlineKeyboardMarkup:
+# --- Кнопка для канала: ведёт в бота (/start menu), а уже в боте открывают WebApp
+def kb_channel_to_bot() -> InlineKeyboardMarkup:
+    url = f"https://t.me/{BOT_USERNAME}?start=menu"
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🍽 Открыть меню", url=WEBAPP_URL)]
+            [InlineKeyboardButton(text="🍽 Открыть меню", url=url)]
         ]
     )
 
 
-# /start в личке
+# /start в личке (и обработка payload: /start menu)
 @dp.message(CommandStart())
-async def start(message: types.Message):
+async def start(message: types.Message, command: CommandObject):
+    # command.args будет "menu", если человек пришёл из канала по ссылке start=menu
+    args = (command.args or "").strip().lower()
+
+    if args == "menu":
+        await message.answer(
+            "🍽 <b>KADIMA Cafe</b>\n"
+            "Откройте меню кнопкой ниже:",
+            reply_markup=kb_webapp()
+        )
+        return
+
     await message.answer(
         "👋 Добро пожаловать в <b>KADIMA Cafe</b>\n"
         "Нажмите кнопку ниже, чтобы открыть меню:",
@@ -60,7 +76,7 @@ async def post_menu(message: types.Message):
         await bot.send_message(
             chat_id=CHANNEL_ID,
             text="🍽 <b>KADIMA Cafe</b>\nНажмите кнопку ниже, чтобы открыть меню:",
-            reply_markup=kb_channel_url()  # ВАЖНО: только url=
+            reply_markup=kb_channel_to_bot()
         )
         await message.answer("✅ Пост с кнопкой отправлен в канал.")
     except Exception as e:
@@ -89,16 +105,16 @@ async def webapp_data(message: types.Message):
     except Exception:
         data = {"_raw": raw}
 
-    order = data.get("order", {})
+    order = data.get("order", {}) if isinstance(data, dict) else {}
     if not isinstance(order, dict):
         order = {}
 
-    total = str(data.get("total", "0"))
-    payment = str(data.get("payment", "не указано"))
-    order_type = str(data.get("type", "не указано"))
-    address = str(data.get("address", "—"))
-    phone = str(data.get("phone", "—"))
-    comment = str(data.get("comment", "—"))
+    total = str(data.get("total", "0")) if isinstance(data, dict) else "0"
+    payment = str(data.get("payment", "не указано")) if isinstance(data, dict) else "не указано"
+    order_type = str(data.get("type", "не указано")) if isinstance(data, dict) else "не указано"
+    address = str(data.get("address", "—")) if isinstance(data, dict) else "—"
+    phone = str(data.get("phone", "—")) if isinstance(data, dict) else "—"
+    comment = str(data.get("comment", "—")) if isinstance(data, dict) else "—"
 
     admin_text = "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n\n"
 
@@ -124,7 +140,7 @@ async def webapp_data(message: types.Message):
     )
 
     # Если пришёл сырой текст (не JSON) — добавим для диагностики
-    if "_raw" in data:
+    if isinstance(data, dict) and "_raw" in data:
         admin_text += f"\n\n🧩 <b>RAW:</b>\n<code>{data['_raw']}</code>"
 
     # Отправка админу (админ должен был нажать /start у бота хотя бы 1 раз)
