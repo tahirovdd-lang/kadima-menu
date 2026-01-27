@@ -7,7 +7,6 @@ from datetime import datetime
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
 from aiogram.client.default import DefaultBotProperties
-from aiogram.filters.command import CommandObject
 from aiogram.types import (
     ReplyKeyboardMarkup, KeyboardButton, WebAppInfo,
     InlineKeyboardMarkup, InlineKeyboardButton
@@ -19,13 +18,11 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
 
-BOT_USERNAME = os.getenv("BOT_USERNAME")  # например: KadimaSignatureBot (без @)
-if not BOT_USERNAME:
-    raise RuntimeError("❌ BOT_USERNAME не найден. Добавь переменную окружения BOT_USERNAME (без @).")
+# ✅ Твой бот
+BOT_USERNAME = "kadima_cafe_bot"  # без @
 
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
-
 WEBAPP_URL = "https://tahirovdd-lang.github.io/kadima-menu/"
 
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
@@ -33,7 +30,7 @@ dp = Dispatcher()
 
 
 def kb_webapp_reply() -> ReplyKeyboardMarkup:
-    # кнопка в личке — лучший вариант для гарантированного web_app_data
+    # ✅ Кнопка WebApp в личке — гарант web_app_data
     return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]],
         resize_keyboard=True
@@ -41,7 +38,7 @@ def kb_webapp_reply() -> ReplyKeyboardMarkup:
 
 
 def kb_channel_deeplink() -> InlineKeyboardMarkup:
-    # ✅ Кнопка для канала: открывает бота и WebApp через startapp (это критично)
+    # ✅ Кнопка в канале: ведёт в бота (startapp), а уже бот покажет web_app кнопку
     deeplink = f"https://t.me/{BOT_USERNAME}?startapp=menu"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🍽 Открыть меню", url=deeplink)]
@@ -56,17 +53,18 @@ def welcome_text() -> str:
     )
 
 
+# ✅ ЛОВИМ обычный /start (ВАЖНО: без deep_link=True)
 @dp.message(CommandStart())
-async def start(message: types.Message, command: CommandObject):
-    # startapp=menu тоже попадает сюда как args
-    args = (command.args or "").strip().lower()
-
-    # Всегда показываем кнопку WebApp в личке
+async def start(message: types.Message):
+    logging.info(f"/start from {message.from_user.id}")
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
-    # Если пришли из канала через startapp=menu — можно дополнительно подсказать
-    if "menu" in args:
-        await message.answer("✅ Меню откроется по кнопке ниже. После оформления заказа он придёт сюда.")
+
+# ✅ ЛОВИМ /startapp menu (Telegram часто присылает именно это)
+@dp.message(Command("startapp"))
+async def startapp(message: types.Message):
+    logging.info(f"/startapp from {message.from_user.id} text={message.text!r}")
+    await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
 
 @dp.message(Command("post_menu"))
@@ -74,21 +72,16 @@ async def post_menu(message: types.Message):
     if message.from_user.id != ADMIN_ID:
         return await message.answer("⛔️ Нет доступа.")
 
-    text = (
-        "🍽 <b>KADIMA Cafe</b>\n"
-        "Нажмите кнопку ниже, чтобы открыть меню:"
-    )
-
+    text = "🍽 <b>KADIMA Cafe</b>\nНажмите кнопку ниже, чтобы открыть меню:"
     try:
         sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_channel_deeplink())
-        # закреп — по желанию, но бот должен быть админом канала с правом закрепа
         try:
             await bot.pin_chat_message(CHANNEL_ID, sent.message_id, disable_notification=True)
             await message.answer("✅ Пост отправлен в канал и закреплён.")
         except Exception:
             await message.answer(
                 "✅ Пост отправлен в канал.\n"
-                "⚠️ Не удалось закрепить автоматически — дай боту право «Закреплять сообщения» или закрепи вручную."
+                "⚠️ Не удалось закрепить — дай боту право «Закреплять сообщения» или закрепи вручную."
             )
     except Exception as e:
         logging.exception("CHANNEL POST ERROR")
@@ -104,7 +97,11 @@ async def ping_admin(message: types.Message):
         await message.answer("✅ Проверка пройдена: админу отправлено сообщение.")
     except Exception as e:
         logging.exception("PING ADMIN ERROR")
-        await message.answer(f"❌ Не смог написать админу. Ошибка: <code>{e}</code>")
+        await message.answer(
+            "❌ Бот не может написать админу.\n"
+            "Проверь: админ сделал /start боту и не блокировал.\n"
+            f"Ошибка: <code>{e}</code>"
+        )
 
 
 def fmt_sum(n: int) -> str:
@@ -120,8 +117,8 @@ async def webapp_data(message: types.Message):
     raw = message.web_app_data.data
     logging.info(f"WEBAPP DATA RAW: {raw}")
 
-    # Если эта строка НЕ появляется у клиента — значит web_app_data не приходит
-    await message.answer("✅ <b>Получил заказ из меню.</b>\nОбрабатываю…")
+    # ✅ если клиент НЕ видит это — значит web_app_data не прилетает
+    await message.answer("✅ <b>Получил заказ.</b>\nОбрабатываю…")
 
     try:
         data = json.loads(raw) if raw else {}
@@ -156,7 +153,7 @@ async def webapp_data(message: types.Message):
     )
 
     if not order:
-        admin_text += "⚠️ Корзина пустая (order пустой)\n"
+        admin_text += "⚠️ Корзина пустая\n"
     else:
         for item, qty in order.items():
             try:
@@ -164,8 +161,7 @@ async def webapp_data(message: types.Message):
                 if q > 0:
                     admin_text += f"• {item} × {q}\n"
             except Exception:
-                if str(qty).strip():
-                    admin_text += f"• {item} × {qty}\n"
+                admin_text += f"• {item} × {qty}\n"
 
     admin_text += (
         f"\n💰 <b>Сумма:</b> {total_str} сум"
@@ -177,20 +173,18 @@ async def webapp_data(message: types.Message):
         f"\n\n👤 <b>Клиент:</b> {message.from_user.full_name} (id: <code>{message.from_user.id}</code>)"
     )
 
-    # Отправляем админу
+    # ✅ Админу
     try:
         await bot.send_message(ADMIN_ID, admin_text)
-        logging.info("ORDER SENT TO ADMIN")
     except Exception as e:
         logging.exception("ADMIN SEND ERROR")
-        await message.answer(
-            "⚠️ Я получил заказ, но не смог отправить админу.\n"
-            "Проверь, что админ запускал бота (/start) и бот не заблокирован.\n"
+        return await message.answer(
+            "⚠️ Заказ получил, но админу отправить не смог.\n"
+            "Проверь: админ сделал /start боту и не блокировал бота.\n"
             f"Ошибка: <code>{e}</code>"
         )
-        return
 
-    # Финальный ответ клиенту
+    # ✅ Клиенту финально
     await message.answer(
         "✅ <b>Ваш заказ принят!</b>\n"
         f"Номер: <b>{order_id}</b>\n"
@@ -199,7 +193,14 @@ async def webapp_data(message: types.Message):
     )
 
 
+@dp.message()
+async def fallback(message: types.Message):
+    await message.answer("🤖 Я на связи. Нажми /start")
+
+
 async def main():
+    logging.info("BOT STARTING...")
+    # ✅ ключевой момент: выключаем webhook, иначе polling молчит
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
