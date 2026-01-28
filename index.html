@@ -427,7 +427,6 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
   <button class="btn" id="btnPickup" onclick="setType('pickup',this)"></button>
 </div>
 
-<!-- ✅ адрес будет скрываться при "Самовывоз" -->
 <input id="address" class="input">
 <input id="phone" class="input">
 
@@ -446,7 +445,6 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
 
 <div class="popup" id="popup"><div class="popup-box">✅ Заказ принят!</div></div>
 
-<!-- ✅ вместо "Оформить заказ" внизу — кнопка "Корзина" -->
 <div class="sticky-checkout">
   <div class="sticky-inner">
     <div class="sticky-sum">
@@ -459,7 +457,6 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
 <script>
 Telegram.WebApp.ready();
 
-/* ✅ звонок из WebApp */
 function callPhone(e){
   try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
   const tel = "tel:+998905389999";
@@ -477,7 +474,7 @@ const tg_username = tgUser.username || "";
 const tg_first_name = tgUser.first_name || "";
 const tg_id = tgUser.id || "";
 
-let lang='ru',category='salads',type='delivery',payment='cash',cart={}; // cart: {id: qty}
+let lang='ru',category='salads',type='delivery',payment='cash',cart={};
 
 const TEXT={
   ru:{delivery:'🚚 Доставка',pickup:'🏃 Самовывоз',address:'📍 Адрес доставки',phone:'📞 Телефон',cart:'🛒 Корзина',order:'Оформить заказ',comment:'✍️ Комментарий к заказу',cash:'💵 Наличные',click:'💳 CLICK',results:'Результаты поиска',popular:'🔥 Популярное',empty:'Корзина пустая'},
@@ -491,7 +488,6 @@ const CATS={
   en:{salads:'🥗 Salads',sauce:'🥣 Sauces',first:'🍜 First dishes',hot:'🍲 Hot dishes',garnish:'🍟 Side dishes',drinks:'🥤 Drinks'}
 };
 
-/* ✅ МЕНЮ (имена на 3 языка) */
 const MENU = {
   salads:[
     {id:'vesenniy', p:25000, img:'images/vesenniy.png', n:{ru:'Весенний', uz:'Bahorgi salat', en:'Spring salad'}},
@@ -527,15 +523,17 @@ const MENU = {
   garnish:[
     {id:'fri', p:20000, img:'images/fri.png', n:{ru:'Фри', uz:'Fri', en:'French fries'}}
   ],
+
+  <!-- ✅✅✅ ВСТАВИЛ: ГОТОВЫЙ DRINKS БЛОК (как у всех блюд) -->
   drinks:[
     {id:'cola15', p:20000, img:'images/cola15.png', n:{ru:'Coca Cola 1.5L', uz:'Coca Cola 1.5L', en:'Coca Cola 1.5L'}},
     {id:'fanta15', p:20000, img:'images/fanta15.png', n:{ru:'Fanta 1.5L', uz:'Fanta 1.5L', en:'Fanta 1.5L'}},
     {id:'pepsi15', p:20000, img:'images/pepsi15.png', n:{ru:'Pepsi 1.5L', uz:'Pepsi 1.5L', en:'Pepsi 1.5L'}},
     {id:'juice1', p:20000, img:'images/juice1.png', n:{ru:'Сок в ассортименте 1L', uz:'Sharbat (assort) 1L', en:'Juice assorted 1L'}},
-    {id:'chertoq15', p:8000, img:'images/chertoq15.png', n:{ru:'Вода газ\\без газа Chertoq 1.5L', uz:"Chertoq suv 1.5L (gazli/gazsiz)", en:'Chertoq water 1.5L (sparkling/still)'}},
-    {id:'tea', p:5000, img:'images/tea.png', n:{ru:'Чай Зеленый\\ Черный', uz:'Choy (yashil/qora)', en:'Tea (green/black)'}},
+    {id:'chertoq15', p:8000, img:'images/chertoq15.png', n:{ru:'Вода газ / без газа Chertoq 1.5L', uz:'Chertoq suv 1.5L (gazli / gazsiz)', en:'Chertoq water 1.5L (sparkling / still)'}},
+    {id:'tea', p:5000, img:'images/tea.png', n:{ru:'Чай зелёный / чёрный', uz:'Choy (yashil / qora)', en:'Tea (green / black)'}},
     {id:'tea_lemon', p:15000, img:'images/tea_lemon.png', n:{ru:'Чай с лимоном', uz:'Limonli choy', en:'Tea with lemon'}},
-    {id:'coffee', p:10000, img:'images/coffee.png', n:{ru:'Кофе растворимый черный', uz:'Qora kofe (eritma)', en:'Instant black coffee'}}
+    {id:'coffee', p:10000, img:'images/coffee.png', n:{ru:'Кофе растворимый чёрный', uz:'Qora kofe (eritma)', en:'Instant black coffee'}}
   ]
 };
 
@@ -583,7 +581,6 @@ function bindSave(){
   phone.addEventListener('input', ()=>localStorage.setItem('kadima_phone', phone.value));
 }
 
-/* ✅ скрыть адрес при самовывозе */
 function updateTypeFields(){
   if(type === 'pickup'){
     address.style.display = 'none';
@@ -612,7 +609,6 @@ function applyLang(){
   payClick.innerText=TEXT[lang].click;
   searchTitle.innerText = TEXT[lang].results;
   popularTitle.innerText = TEXT[lang].popular;
-
   stickyCartBtn.innerText = TEXT[lang].cart;
 
   renderPopular();
@@ -623,13 +619,11 @@ function applyLang(){
   updateTypeFields();
 }
 
-/* ✅ Корзина (скролл) */
 function openCart(){
   try{ cartBox.scrollIntoView({behavior:'smooth', block:'start'}); }
   catch(_){ window.location.hash = '#cartBox'; }
 }
 
-/* ✅ Популярное */
 function renderPopular(){
   popularRow.innerHTML = '';
   POPULAR.forEach((id)=>{
@@ -651,7 +645,6 @@ function addPopular(id){
   if(isSearchOpen()) closeSearch();
 }
 
-/* ✅ Быстрые фильтры */
 function renderQuickFilters(){
   const keys = ['salads','hot','first','drinks'];
   quickFilters.innerHTML = '';
@@ -667,7 +660,6 @@ function pickCategory(k){
   renderProducts();
 }
 
-/* ✅ Категории */
 function renderCats(){
   cats.innerHTML='';
   for(let k in MENU){
@@ -681,7 +673,6 @@ function renderCats(){
   }, 50);
 }
 
-/* ✅ Карточка */
 function cardHTML(it, q=''){
   const id = it.id;
   const displayName = nameOf(id);
@@ -726,7 +717,6 @@ function updateTotal(){
   stickyTotal.innerText = formatSum(s);
 }
 
-/* ✅ Тип доставки/самовывоз */
 function setType(t,b){
   if(isSearchOpen()) closeSearch();
   type=t;
@@ -735,14 +725,12 @@ function setType(t,b){
   updateTypeFields();
 }
 
-/* ✅ Оплата */
 function setPayment(p){
   payment=p;
   payCash.classList.toggle('active',p==='cash');
   payClick.classList.toggle('active',p==='click');
 }
 
-/* ✅ Поиск */
 function isSearchOpen(){ return searchWrap.classList.contains('show'); }
 
 function toggleSearch(){
@@ -801,7 +789,6 @@ function searchProducts(){
   }
 }
 
-/* ✅ авто-закрытие поиска при клике вне него */
 document.addEventListener('click', (e)=>{
   if(!isSearchOpen()) return;
   const t = e.target;
@@ -810,7 +797,6 @@ document.addEventListener('click', (e)=>{
   if(!insideSearch && !onBtn) closeSearch();
 }, true);
 
-/* ✅✅✅ номер заказа KAD-DDMM-001 */
 function genOrderId(){
   const d = new Date();
   const dd = String(d.getDate()).padStart(2,'0');
@@ -830,7 +816,6 @@ function calcTotalNum(){
   return s;
 }
 
-/* ✅ отправка */
 function sendOrder(){
   popup.classList.add('show');
 
