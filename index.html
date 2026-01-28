@@ -159,8 +159,36 @@ body{
 }
 .card:active{transform:scale(.99);}
 
-.img{height:76px;display:flex;align-items:center;justify-content:center;}
-.img img{max-width:62px;opacity:.9;}
+/* ✅ FIX: даём картинке больше места + переносим название ниже */
+.img{
+  height:110px;                 /* было 76px */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:10px;           /* добавили отступ до названия */
+}
+.img img{
+  max-width:92px;               /* было 62px */
+  max-height:92px;              /* чтобы не лезло на текст */
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  opacity:.95;
+  display:block;
+}
+
+/* ✅ название блюда отдельным блоком ниже фото */
+.item-name{
+  margin-top:2px;
+  padding:0 6px;
+  font-weight:800;
+  line-height:1.15;
+  min-height:34px;              /* держит высоту в 2 строки */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  word-break:break-word;
+}
 
 .price{font-weight:800;color:var(--meat);margin-top:6px;}
 .price small{font-weight:700;opacity:.75;margin-left:4px;}
@@ -624,7 +652,7 @@ function cardHTML(n,p,img,q=''){
   const nameHtml = highlight(n, q);
   return `<div class="card">
     <div class="img"><img src="${img}" onerror="this.src='logo.png'"></div>
-    <div>${nameHtml}</div>
+    <div class="item-name">${nameHtml}</div>
     <div class="price">${formatSum(p)} <small>сум</small></div>
     <div class="counter">
       <button onclick="chg('${n}',-1)">−</button>
@@ -699,14 +727,10 @@ function closeSearch(){
   searchInput.value = '';
   renderProducts();
 }
-function clearSearch(){
-  closeSearch();
-}
+function clearSearch(){ closeSearch(); }
 
 function onSearchKey(e){
-  if(e.key === 'Enter'){
-    closeSearch();
-  }
+  if(e.key === 'Enter') closeSearch();
 }
 
 function searchProducts(){
@@ -737,9 +761,7 @@ document.addEventListener('click', (e)=>{
   const t = e.target;
   const insideSearch = searchWrap.contains(t) || searchTitle.contains(t);
   const onBtn = t.closest && t.closest('.search-btn');
-  if(!insideSearch && !onBtn){
-    closeSearch();
-  }
+  if(!insideSearch && !onBtn) closeSearch();
 }, true);
 
 /* ✅✅✅ Вариант №2: номер KAD-DDMM-001 (счётчик в localStorage на этом телефоне) */
@@ -747,13 +769,13 @@ function genOrderId(){
   const d = new Date();
   const dd = String(d.getDate()).padStart(2,'0');
   const mm = String(d.getMonth()+1).padStart(2,'0');
-  const key = `kadima_seq_${d.getFullYear()}${mm}${dd}`; // счётчик на конкретную дату
+  const key = `kadima_seq_${d.getFullYear()}${mm}${dd}`;
 
   let n = Number(localStorage.getItem(key) || 0) + 1;
   localStorage.setItem(key, String(n));
 
   const num = String(n).padStart(3,'0');
-  return `KAD-${dd}${mm}-${num}`; // пример: KAD-2801-001
+  return `KAD-${dd}${mm}-${num}`;
 }
 
 function calcTotalNum(){
@@ -789,7 +811,6 @@ function sendOrder(){
     phone: phone.value,
     comment: comment.value,
     order_id: genOrderId()
-    /* ✅ created_at убрали полностью */
   };
 
   setTimeout(()=>{
