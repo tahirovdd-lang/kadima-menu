@@ -159,23 +159,26 @@ body{
 }
 .card:active{transform:scale(.99);}
 
-/* ✅ FIX: даём картинке больше места + переносим название ниже */
+/* ✅ УВЕЛИЧИЛИ ФОТО БЛЮД (сделали ближе) */
 .img{
-  height:110px;                 /* было 76px */
+  height:140px;              /* было 110px */
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-bottom:10px;           /* добавили отступ до названия */
+  margin-bottom:6px;         /* ближе к названию */
 }
 .img img{
-  max-width:92px;               /* было 62px */
-  max-height:92px;              /* чтобы не лезло на текст */
+  max-width:125px;           /* было 92px */
+  max-height:125px;          /* было 92px */
   width:auto;
   height:auto;
   object-fit:contain;
-  opacity:.95;
-  display:block;
+  opacity:1;                 /* было .95 */
+  transform:scale(1.05);     /* лёгкий зум */
+  transition:.15s;
 }
+/* доп. эффект при нажатии */
+.card:active .img img{transform:scale(1.12);}
 
 /* ✅ название блюда отдельным блоком ниже фото */
 .item-name{
@@ -183,7 +186,7 @@ body{
   padding:0 6px;
   font-weight:800;
   line-height:1.15;
-  min-height:34px;              /* держит высоту в 2 строки */
+  min-height:34px;
   display:flex;
   align-items:center;
   justify-content:center;
