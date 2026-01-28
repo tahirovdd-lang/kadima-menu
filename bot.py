@@ -19,6 +19,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
 
+# ✅ поменяй под свой бот/канал/сайт
 BOT_USERNAME = "kadima_cafe_bot"  # без @
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
@@ -46,26 +47,30 @@ def allow_start(user_id: int, ttl: float = 2.0) -> bool:
 
 
 # ====== КНОПКИ ======
+BTN_OPEN_MULTI = "Ochish • Открыть • Open"
+
 def kb_webapp_reply() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="🍽 Открыть меню", web_app=WebAppInfo(url=WEBAPP_URL))]],
+        keyboard=[[KeyboardButton(text=BTN_OPEN_MULTI, web_app=WebAppInfo(url=WEBAPP_URL))]],
         resize_keyboard=True
     )
-
 
 def kb_channel_deeplink() -> InlineKeyboardMarkup:
     deeplink = f"https://t.me/{BOT_USERNAME}?startapp=menu"
     return InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="🍽 Открыть меню", url=deeplink)]]
+        inline_keyboard=[[InlineKeyboardButton(text=BTN_OPEN_MULTI, url=deeplink)]]
     )
 
 
 # ====== ТЕКСТ ======
 def welcome_text() -> str:
     return (
-        "✨ <b>KADIMA Cafe</b>\n\n"
-        "Нажмите кнопку ниже, чтобы открыть меню.\n"
-        "✅ После заказа мы пришлём подтверждение сюда."
+        "🇷🇺 Добро пожаловать в <b>O'ZBEGIM</b>! 👋\n"
+        "Выберите любимые блюда и оформите заказ — просто нажмите «Открыть» ниже.\n\n"
+        "🇺🇿 <b>O'ZBEGIM</b> ga xush kelibsiz! 👋\n"
+        "Sevimli taomlaringizni tanlang va buyurtma bering — buning uchun pastdagi «Ochish» tugmasini bosing.\n\n"
+        "🇬🇧 Welcome to <b>O'ZBEGIM</b>! 👋\n"
+        "Choose your favorite dishes and place an order — just tap “Open” below."
     )
 
 
@@ -75,7 +80,6 @@ async def start(message: types.Message):
     if not allow_start(message.from_user.id, ttl=2.0):
         return
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
-
 
 @dp.message(Command("startapp"))
 async def startapp(message: types.Message):
@@ -90,7 +94,12 @@ async def post_menu(message: types.Message):
     if message.from_user.id != ADMIN_ID:
         return await message.answer("⛔️ Нет доступа.")
 
-    text = "🍽 <b>KADIMA Cafe</b>\nНажмите кнопку ниже, чтобы открыть меню:"
+    text = (
+        "🇷🇺 <b>O'ZBEGIM</b>\nНажмите кнопку ниже, чтобы открыть меню.\n\n"
+        "🇺🇿 <b>O'ZBEGIM</b>\nPastdagi tugma orqali menyuni oching.\n\n"
+        "🇬🇧 <b>O'ZBEGIM</b>\nTap the button below to open the menu."
+    )
+
     try:
         sent = await bot.send_message(CHANNEL_ID, text, reply_markup=kb_channel_deeplink())
         try:
@@ -114,10 +123,8 @@ def fmt_sum(n: int) -> str:
         n = 0
     return f"{n:,}".replace(",", " ")
 
-
 def tg_label(u: types.User) -> str:
     return f"@{u.username}" if u.username else u.full_name
-
 
 def clean_str(v) -> str:
     return ("" if v is None else str(v)).strip()
@@ -167,7 +174,7 @@ async def webapp_data(message: types.Message):
 
     # ====== АДМИН ======
     admin_text = (
-        "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n"
+        "🚨 <b>НОВЫЙ ЗАКАЗ O'ZBEGIM</b>\n"
         f"🆔 <b>{order_id}</b>\n\n"
         + "\n".join(lines) +
         f"\n\n💰 <b>Сумма:</b> {total_str} сум"
@@ -205,7 +212,6 @@ async def webapp_data(message: types.Message):
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
