@@ -19,7 +19,6 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
 
-# ✅ поменяй под свой бот/канал/сайт
 BOT_USERNAME = "kadima_cafe_bot"  # без @
 ADMIN_ID = 6013591658
 CHANNEL_ID = "@Kadimasignaturetaste"
@@ -34,10 +33,6 @@ dp = Dispatcher()
 _last_start: dict[int, float] = {}
 
 def allow_start(user_id: int, ttl: float = 2.0) -> bool:
-    """
-    Telegram иногда вызывает /start два раза при очистке истории + заходе через канал.
-    Эта защита пропускает только первый вызов в течение ttl секунд.
-    """
     now = time.time()
     prev = _last_start.get(user_id, 0.0)
     if now - prev < ttl:
@@ -65,11 +60,11 @@ def kb_channel_deeplink() -> InlineKeyboardMarkup:
 # ====== ТЕКСТ ======
 def welcome_text() -> str:
     return (
-        "🇷🇺 Добро пожаловать в <b>O'ZBEGIM</b>! 👋\n"
+        "🇷🇺 Добро пожаловать в <b>KADIMA</b>! 👋 "
         "Выберите любимые блюда и оформите заказ — просто нажмите «Открыть» ниже.\n\n"
-        "🇺🇿 <b>O'ZBEGIM</b> ga xush kelibsiz! 👋\n"
+        "🇺🇿 <b>KADIMA</b> ga xush kelibsiz! 👋 "
         "Sevimli taomlaringizni tanlang va buyurtma bering — buning uchun pastdagi «Ochish» tugmasini bosing.\n\n"
-        "🇬🇧 Welcome to <b>O'ZBEGIM</b>! 👋\n"
+        "🇬🇧 Welcome to <b>KADIMA</b>! 👋 "
         "Choose your favorite dishes and place an order — just tap “Open” below."
     )
 
@@ -77,13 +72,13 @@ def welcome_text() -> str:
 # ====== /start ======
 @dp.message(CommandStart())
 async def start(message: types.Message):
-    if not allow_start(message.from_user.id, ttl=2.0):
+    if not allow_start(message.from_user.id):
         return
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
 @dp.message(Command("startapp"))
 async def startapp(message: types.Message):
-    if not allow_start(message.from_user.id, ttl=2.0):
+    if not allow_start(message.from_user.id):
         return
     await message.answer(welcome_text(), reply_markup=kb_webapp_reply())
 
@@ -95,9 +90,9 @@ async def post_menu(message: types.Message):
         return await message.answer("⛔️ Нет доступа.")
 
     text = (
-        "🇷🇺 <b>O'ZBEGIM</b>\nНажмите кнопку ниже, чтобы открыть меню.\n\n"
-        "🇺🇿 <b>O'ZBEGIM</b>\nPastdagi tugma orqali menyuni oching.\n\n"
-        "🇬🇧 <b>O'ZBEGIM</b>\nTap the button below to open the menu."
+        "🇷🇺 <b>KADIMA</b>\nНажмите кнопку ниже, чтобы открыть меню.\n\n"
+        "🇺🇿 <b>KADIMA</b>\nPastdagi tugma orqali menyuni oching.\n\n"
+        "🇬🇧 <b>KADIMA</b>\nTap the button below to open the menu."
     )
 
     try:
@@ -144,9 +139,6 @@ async def webapp_data(message: types.Message):
         data = {}
 
     order = data.get("order", {})
-    if not isinstance(order, dict):
-        order = {}
-
     total_num = int(data.get("total_num", 0) or 0)
     total_str = clean_str(data.get("total")) or fmt_sum(total_num)
 
@@ -160,21 +152,10 @@ async def webapp_data(message: types.Message):
     pay_label = {"cash": "💵 Наличные", "click": "💳 Безнал (CLICK)"}.get(payment, payment)
     type_label = {"delivery": "🚚 Доставка", "pickup": "🏃 Самовывоз"}.get(order_type, order_type)
 
-    lines = []
-    for item, qty in order.items():
-        try:
-            q = int(qty)
-        except Exception:
-            q = qty
-        if isinstance(q, int) and q <= 0:
-            continue
-        lines.append(f"• {item} × {q}")
-    if not lines:
-        lines = ["⚠️ Корзина пустая"]
+    lines = [f"• {item} × {qty}" for item, qty in order.items() if int(qty) > 0] or ["⚠️ Корзина пустая"]
 
-    # ====== АДМИН ======
     admin_text = (
-        "🚨 <b>НОВЫЙ ЗАКАЗ O'ZBEGIM</b>\n"
+        "🚨 <b>НОВЫЙ ЗАКАЗ KADIMA</b>\n"
         f"🆔 <b>{order_id}</b>\n\n"
         + "\n".join(lines) +
         f"\n\n💰 <b>Сумма:</b> {total_str} сум"
@@ -184,28 +165,19 @@ async def webapp_data(message: types.Message):
         f"\n📞 <b>Телефон:</b> {phone}"
         f"\n👤 <b>Telegram:</b> {tg_label(message.from_user)}"
     )
+
     if comment:
         admin_text += f"\n💬 <b>Комментарий:</b> {comment}"
 
     await bot.send_message(ADMIN_ID, admin_text)
 
-    # ====== КЛИЕНТ ======
-    client_text = (
+    await message.answer(
         "✅ <b>Ваш заказ принят!</b>\n"
         "🙏 Спасибо за заказ!\n\n"
         f"🆔 <b>{order_id}</b>\n\n"
-        "<b>Состав заказа:</b>\n"
         + "\n".join(lines) +
         f"\n\n💰 <b>Сумма:</b> {total_str} сум"
-        f"\n🚚 <b>Тип:</b> {type_label}"
-        f"\n💳 <b>Оплата:</b> {pay_label}"
-        f"\n📍 <b>Адрес:</b> {address}"
-        f"\n📞 <b>Телефон:</b> {phone}"
     )
-    if comment:
-        client_text += f"\n💬 <b>Комментарий:</b> {comment}"
-
-    await message.answer(client_text)
 
 
 # ====== ЗАПУСК ======
