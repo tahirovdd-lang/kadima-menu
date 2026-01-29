@@ -340,6 +340,31 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
 .pop-price{font-weight:900;color:var(--meat);margin-top:4px;}
 .pop-badge{position:absolute;left:10px;top:10px;font-size:18px;pointer-events:none;}
 
+/* ✅✅✅ ДОБАВИЛ: мини-счетчик в "Популярное" */
+.pop-counter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-top:8px;
+}
+.pop-counter button{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  cursor:pointer;
+
+  border:1px solid rgba(255,255,255,.6);
+  background:var(--green);
+  color:#fff;
+  font-size:16px;
+  font-weight:900;
+  box-shadow:0 6px 14px var(--shadow);
+  transition:.15s;
+}
+.pop-counter button:active{transform:scale(.96);}
+.pop-counter span{font-weight:900; min-width:18px; text-align:center;}
+
 .sticky-checkout{
   position:fixed;
   left:0; right:0; bottom:0;
@@ -523,8 +548,6 @@ const MENU = {
   garnish:[
     {id:'fri', p:20000, img:'images/fri.png', n:{ru:'Фри', uz:'Fri', en:'French fries'}}
   ],
-
-  <!-- ✅✅✅ ВСТАВИЛ: ГОТОВЫЙ DRINKS БЛОК (как у всех блюд) -->
   drinks:[
     {id:'cola15', p:20000, img:'images/cola15.png', n:{ru:'Coca Cola 1.5L', uz:'Coca Cola 1.5L', en:'Coca Cola 1.5L'}},
     {id:'fanta15', p:20000, img:'images/fanta15.png', n:{ru:'Fanta 1.5L', uz:'Fanta 1.5L', en:'Fanta 1.5L'}},
@@ -624,24 +647,48 @@ function openCart(){
   catch(_){ window.location.hash = '#cartBox'; }
 }
 
+/* ✅✅✅ ИЗМЕНИЛ: популярное теперь с +- и работает в корзину */
 function renderPopular(){
   popularRow.innerHTML = '';
   POPULAR.forEach((id)=>{
     const it = ITEM_INDEX[id];
     if(!it) return;
     cart[id]=cart[id]||0;
+
     popularRow.innerHTML += `
-      <div class="pop-card" onclick="addPopular('${id}')">
+      <div class="pop-card" onclick="onPopularCardClick(event,'${id}')">
         <div class="pop-badge">🔥</div>
         <div class="pop-img"><img src="${it.img}" onerror="this.src='logo.png'"></div>
         <div class="pop-name">${escapeHtml(nameOf(id))}</div>
         <div class="pop-price">${formatSum(it.p)} <small>сум</small></div>
+
+        <div class="pop-counter">
+          <button type="button" onclick="popChg(event,'${id}',-1)">−</button>
+          <span id="pc_${id}">${cart[id]||0}</span>
+          <button type="button" onclick="popChg(event,'${id}',1)">+</button>
+        </div>
       </div>
     `;
   });
 }
-function addPopular(id){
+
+/* клик по карточке (НЕ по кнопкам) = добавить +1 */
+function onPopularCardClick(e,id){
+  // если нажали на кнопку внутри - не добавляем повторно
+  if(e && e.target && (e.target.closest && e.target.closest('button'))) return;
   chg(id, 1);
+  // обновим счетчик популярного (на случай если карточка не перерисована)
+  const pc = document.getElementById('pc_'+id);
+  if(pc) pc.innerText = cart[id] || 0;
+  if(isSearchOpen()) closeSearch();
+}
+
+/* кнопки +/- в популярном */
+function popChg(e,id,delta){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  chg(id, delta);
+  const pc = document.getElementById('pc_'+id);
+  if(pc) pc.innerText = cart[id] || 0;
   if(isSearchOpen()) closeSearch();
 }
 
@@ -699,11 +746,20 @@ function renderProducts(){
   });
 }
 
+/* ✅✅✅ ДОБАВИЛ: синхронизация счетчиков в "Популярное" при любом изменении */
+function syncPopularCounters(){
+  POPULAR.forEach((id)=>{
+    const el = document.getElementById('pc_'+id);
+    if(el) el.innerText = cart[id] || 0;
+  });
+}
+
 function chg(id,v){
   cart[id]=Math.max(0,(cart[id]||0)+v);
   const el = document.getElementById('c_'+id);
   if(el) el.innerText=cart[id];
   updateTotal();
+  syncPopularCounters();
 }
 
 function price(id){
