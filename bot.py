@@ -20,7 +20,7 @@ if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN не найден. Добавь переменную окружения BOT_TOKEN.")
 
 BOT_USERNAME = "kadima_cafe_bot"  # без @
-ADMIN_ID = 6013591658
+ADMIN_ID = 8145095421             # ✅ ОБНОВЛЁННЫЙ ADMIN ID
 CHANNEL_ID = "@Kadimasignaturetaste"
 
 # ⚠️ ВАЖНО: версия, чтобы Telegram не кешировал старый сайт
