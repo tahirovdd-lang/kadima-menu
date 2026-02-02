@@ -25,11 +25,14 @@
   --r-md:22px;
   --r-pill:28px;
 
-  /* ✅ Telegram viewport vars (будем обновлять из JS) */
+  /* ✅ Telegram viewport vars */
   --app-h: 100vh;
+
+  /* ✅✅✅ ВАЖНО: высота нижней sticky панели (будет считаться JS) */
+  --sticky-h: 92px;
 }
 
-/* ✅✅✅ ДОБАВИЛ: тёмная тема через data-theme="dark" */
+/* тёмная тема */
 body[data-theme="dark"]{
   --bg:#121212;
   --stroke: rgba(255,255,255,.14);
@@ -42,31 +45,27 @@ body[data-theme="dark"]{
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-/* ✅✅✅ ВАЖНО: фикс высоты для Telegram WebApp (чтобы не открывалось на 50%) */
 html,body{
   height:100%;
   margin:0;
   padding:0;
 }
+
 body{
   font-family:'Montserrat',sans-serif;
   background:var(--bg);
   color:#2b2b2b;
 
-  /* ✅ минимум высоты под разные браузеры */
   min-height:100vh;
   min-height:100dvh;
-
-  /* ✅ Telegram даёт реальные значения, используем их */
   min-height: var(--tg-viewport-height, 100vh);
   min-height: var(--app-h, 100vh);
 
-  /* ✅ низ под sticky панель */
-  padding-bottom:88px;
-
-  /* ✅ плавный скролл + нормальный overscroll */
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
+
+  /* ✅✅✅ ВАЖНО: запас снизу = sticky панель + safe area */
+  padding-bottom: calc(var(--sticky-h, 92px) + 18px + var(--tg-safe-area-inset-bottom, 0px));
 }
 
 body[data-theme="dark"]{ color:#f1f1f1; }
@@ -99,7 +98,7 @@ body[data-theme="dark"]{ color:#f1f1f1; }
   cursor:pointer;
 }
 
-/* ✅✅✅ кнопка меню (бургер) справа в шапке */
+/* бургер */
 .menu-btn{
   position:absolute;
   right:14px;
@@ -129,7 +128,7 @@ body[data-theme="dark"]{ color:#f1f1f1; }
 .burger span:nth-child(2){top:6.5px;}
 .burger span:nth-child(3){bottom:0;}
 
-/* 🔍 Кнопка поиска */
+/* поиск */
 .search-btn{
   position:absolute;
   right:14px;
@@ -238,7 +237,6 @@ body[data-theme="dark"] .card{
 }
 .card:active{transform:scale(.99);}
 
-/* ✅ фото блюд крупнее */
 .img{
   height:140px;
   display:flex;
@@ -296,6 +294,9 @@ body[data-theme="dark"] .card{
   border-radius:var(--r-lg);
   border:1px solid var(--stroke);
   box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
+
+  /* ✅✅✅ ВАЖНО: если доскроллили к корзине — учитываем нижнюю панель */
+  scroll-margin-bottom: calc(var(--sticky-h, 92px) + 22px);
 }
 body[data-theme="dark"] .cart{
   background:rgba(255,255,255,.06);
@@ -304,6 +305,7 @@ body[data-theme="dark"] .cart{
 
 textarea.input{height:90px;}
 
+/* ✅✅✅ ВАЖНО: кнопка заказа всегда видна над sticky-панелью */
 .order-btn{
   width:100%;
   padding:18px;
@@ -318,6 +320,10 @@ textarea.input{height:90px;}
   background:linear-gradient(135deg,var(--green),#2e7d32);
   box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 10px 22px rgba(31,77,58,.18);
   transition:.15s;
+
+  position: sticky;
+  bottom: calc(var(--sticky-h, 92px) + 12px);
+  z-index: 40;
 }
 .order-btn:active{transform:scale(.99);}
 
@@ -430,7 +436,6 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
 .pop-price{font-weight:900;color:var(--meat);margin-top:4px;}
 .pop-badge{position:absolute;left:10px;top:10px;font-size:18px;pointer-events:none;}
 
-/* мини-счетчик в "Популярное" */
 .pop-counter{
   display:flex;
   align-items:center;
@@ -455,6 +460,7 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
 .pop-counter button:active{transform:scale(.96);}
 .pop-counter span{font-weight:900; min-width:18px; text-align:center;}
 
+/* нижняя панель */
 .sticky-checkout{
   position:fixed;
   left:0; right:0; bottom:0;
@@ -508,7 +514,7 @@ body[data-theme="dark"] .sticky-inner{background:rgba(255,255,255,.06);}
   .pop-card:hover{transform:translateY(-2px);}
 }
 
-/* окно меню (sheet) */
+/* меню sheet */
 .menu-backdrop{
   position:fixed;
   inset:0;
@@ -589,7 +595,7 @@ body[data-theme="dark"] .menu-ic{background:rgba(255,255,255,.06);}
 .menu-sub{font-size:12px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
 .menu-right{opacity:.65;font-weight:900;}
 
-/* модалка "О нас" */
+/* модалка О нас */
 .about-modal{
   position:fixed;
   inset:0;
@@ -633,9 +639,7 @@ body[data-theme="dark"] .about-card{
   </div>
 
   <div class="menu-btn" onclick="openTopMenu()" title="Меню">
-    <div class="burger">
-      <span></span><span></span><span></span>
-    </div>
+    <div class="burger"><span></span><span></span><span></span></div>
   </div>
 
   <div class="search-btn" onclick="toggleSearch()">🔍</div>
@@ -676,9 +680,7 @@ body[data-theme="dark"] .about-card{
         Если виджет не открылся в Telegram — откройте отзывы через кнопку ниже.
       </div>
       <div style="display:flex; justify-content:center; margin-top:8px;">
-        <button class="btn" style="min-width:auto; padding:10px 14px;" onclick="openYandexReviews(event)">
-          Открыть отзывы
-        </button>
+        <button class="btn" style="min-width:auto; padding:10px 14px;" onclick="openYandexReviews(event)">Открыть отзывы</button>
       </div>
     </div>
 
@@ -787,7 +789,7 @@ body[data-theme="dark"] .about-card{
 
 <div class="popup" id="popup"><div class="popup-box">✅ Заказ принят!</div></div>
 
-<div class="sticky-checkout">
+<div class="sticky-checkout" id="stickyCheckout">
   <div class="sticky-inner">
     <div class="sticky-sum">
       <span id="stickyTotal">0</span> <small>сум</small>
@@ -797,14 +799,14 @@ body[data-theme="dark"] .about-card{
 </div>
 
 <script>
-/* ✅✅✅ ВАЖНО: раскрываем WebApp и синхроним высоту */
 Telegram.WebApp.ready();
 
 try{
-  Telegram.WebApp.expand();                 // <- главное: убирает “50%”
-  Telegram.WebApp.disableVerticalSwipes?.(); // опционально: меньше случайных свайпов
+  Telegram.WebApp.expand();
+  Telegram.WebApp.disableVerticalSwipes?.();
 } catch(_){}
 
+/* ✅✅✅ высота приложения (уже была) */
 function setAppHeight(){
   const h = (window.Telegram && Telegram.WebApp && Telegram.WebApp.viewportHeight)
     ? Telegram.WebApp.viewportHeight
@@ -812,7 +814,6 @@ function setAppHeight(){
 
   document.documentElement.style.setProperty('--app-h', h + 'px');
 
-  // Telegram vars (на некоторых версиях доступны)
   try{
     if(window.Telegram && Telegram.WebApp){
       if (Telegram.WebApp.viewportHeight) {
@@ -824,11 +825,23 @@ function setAppHeight(){
     }
   }catch(_){}
 }
-setAppHeight();
-window.addEventListener('resize', setAppHeight);
-try{
-  Telegram.WebApp.onEvent('viewportChanged', setAppHeight);
-} catch(_){}
+
+/* ✅✅✅ ВАЖНО: считаем реальную высоту нижней панели, чтобы она НЕ перекрывала кнопку */
+function setStickyHeight(){
+  const el = document.getElementById('stickyCheckout');
+  if(!el) return;
+  const h = Math.ceil(el.getBoundingClientRect().height || el.offsetHeight || 92);
+  document.documentElement.style.setProperty('--sticky-h', h + 'px');
+}
+
+function refreshLayout(){
+  setAppHeight();
+  setStickyHeight();
+}
+
+refreshLayout();
+window.addEventListener('resize', refreshLayout);
+try{ Telegram.WebApp.onEvent('viewportChanged', refreshLayout); } catch(_){}
 
 function callPhone(e){
   try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
@@ -853,7 +866,6 @@ function closeTopMenu(){
   document.getElementById('menuSheet').classList.remove('show');
 }
 
-/* виджет отзывов */
 function toggleReviewWidget(){
   const w = document.getElementById('reviewWidgetWrap');
   w.style.display = (w.style.display === 'none' || !w.style.display) ? 'block' : 'none';
@@ -870,7 +882,6 @@ function openYandexReviews(e){
   window.open(url, "_blank");
 }
 
-/* Instagram */
 function openInstagram(e){
   try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
   const url = "https://www.instagram.com/KADIMA.UZ/";
@@ -884,7 +895,6 @@ function openInstagram(e){
   window.open(url, "_blank");
 }
 
-/* тема (сохранение) */
 function applyTheme(theme){
   document.body.setAttribute('data-theme', theme);
   localStorage.setItem('kadima_theme', theme);
@@ -905,7 +915,6 @@ function toggleThemeFromMenu(){
   applyTheme(next);
 }
 
-/* О нас */
 function openAbout(){
   closeTopMenu();
   document.getElementById('aboutModal').classList.add('show');
@@ -1069,6 +1078,9 @@ function applyLang(){
   renderProducts();
   updateTotal();
   updateTypeFields();
+
+  // ✅ на всякий случай обновим высоту sticky после перерендера
+  setTimeout(setStickyHeight, 50);
 }
 
 function openCart(){
