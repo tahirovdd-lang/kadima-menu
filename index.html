@@ -24,6 +24,9 @@
   --r-lg:24px;
   --r-md:22px;
   --r-pill:28px;
+
+  /* ✅ Telegram viewport vars (будем обновлять из JS) */
+  --app-h: 100vh;
 }
 
 /* ✅✅✅ ДОБАВИЛ: тёмная тема через data-theme="dark" */
@@ -38,17 +41,35 @@ body[data-theme="dark"]{
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{
+
+/* ✅✅✅ ВАЖНО: фикс высоты для Telegram WebApp (чтобы не открывалось на 50%) */
+html,body{
+  height:100%;
   margin:0;
+  padding:0;
+}
+body{
   font-family:'Montserrat',sans-serif;
   background:var(--bg);
   color:#2b2b2b;
+
+  /* ✅ минимум высоты под разные браузеры */
+  min-height:100vh;
+  min-height:100dvh;
+
+  /* ✅ Telegram даёт реальные значения, используем их */
+  min-height: var(--tg-viewport-height, 100vh);
+  min-height: var(--app-h, 100vh);
+
+  /* ✅ низ под sticky панель */
   padding-bottom:88px;
+
+  /* ✅ плавный скролл + нормальный overscroll */
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
 }
 
-body[data-theme="dark"]{
-  color:#f1f1f1;
-}
+body[data-theme="dark"]{ color:#f1f1f1; }
 
 .header{
   padding:16px 12px 26px;
@@ -78,7 +99,7 @@ body[data-theme="dark"]{
   cursor:pointer;
 }
 
-/* ✅✅✅ ДОБАВИЛ: кнопка меню (бургер) справа в шапке */
+/* ✅✅✅ кнопка меню (бургер) справа в шапке */
 .menu-btn{
   position:absolute;
   right:14px;
@@ -98,9 +119,7 @@ body[data-theme="dark"]{
   transition:.15s;
 }
 .menu-btn:active{transform:scale(.97);}
-.burger{
-  width:22px;height:16px;position:relative;
-}
+.burger{width:22px;height:16px;position:relative;}
 .burger span{
   position:absolute;left:0;right:0;
   height:3px;border-radius:10px;
@@ -110,7 +129,7 @@ body[data-theme="dark"]{
 .burger span:nth-child(2){top:6.5px;}
 .burger span:nth-child(3){bottom:0;}
 
-/* 🔍 Кнопка поиска оставил как было (справа снизу) */
+/* 🔍 Кнопка поиска */
 .search-btn{
   position:absolute;
   right:14px;
@@ -411,7 +430,7 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
 .pop-price{font-weight:900;color:var(--meat);margin-top:4px;}
 .pop-badge{position:absolute;left:10px;top:10px;font-size:18px;pointer-events:none;}
 
-/* ✅✅✅ ДОБАВИЛ: мини-счетчик в "Популярное" */
+/* мини-счетчик в "Популярное" */
 .pop-counter{
   display:flex;
   align-items:center;
@@ -444,6 +463,7 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
   backdrop-filter: blur(10px);
   z-index:999;
   border-top:1px solid rgba(199,107,47,.25);
+  padding-bottom: calc(10px + var(--tg-safe-area-inset-bottom, 0px));
 }
 body[data-theme="dark"] .sticky-checkout{
   background:rgba(18,18,18,.88);
@@ -462,9 +482,7 @@ body[data-theme="dark"] .sticky-checkout{
   justify-content:space-between;
   gap:12px;
 }
-body[data-theme="dark"] .sticky-inner{
-  background:rgba(255,255,255,.06);
-}
+body[data-theme="dark"] .sticky-inner{background:rgba(255,255,255,.06);}
 .sticky-sum{font-weight:900;line-height:1.1;}
 .sticky-sum small{display:block;font-weight:800;opacity:.75;margin-top:2px;}
 .sticky-btn{
@@ -490,7 +508,7 @@ body[data-theme="dark"] .sticky-inner{
   .pop-card:hover{transform:translateY(-2px);}
 }
 
-/* ✅✅✅ ДОБАВИЛ: окно меню (sheet) */
+/* окно меню (sheet) */
 .menu-backdrop{
   position:fixed;
   inset:0;
@@ -514,6 +532,7 @@ body[data-theme="dark"] .sticky-inner{
   transition:.22s;
   z-index:1010;
   padding:10px 12px 14px;
+  padding-bottom: calc(14px + var(--tg-safe-area-inset-bottom, 0px));
 }
 body[data-theme="dark"] .menu-sheet{
   background:#1c1c1c;
@@ -570,7 +589,7 @@ body[data-theme="dark"] .menu-ic{background:rgba(255,255,255,.06);}
 .menu-sub{font-size:12px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
 .menu-right{opacity:.65;font-weight:900;}
 
-/* ✅✅✅ ДОБАВИЛ: модалка "О нас" */
+/* модалка "О нас" */
 .about-modal{
   position:fixed;
   inset:0;
@@ -613,7 +632,6 @@ body[data-theme="dark"] .about-card{
     </div>
   </div>
 
-  <!-- ✅✅✅ ДОБАВИЛ: меню справа сверху -->
   <div class="menu-btn" onclick="openTopMenu()" title="Меню">
     <div class="burger">
       <span></span><span></span><span></span>
@@ -623,7 +641,6 @@ body[data-theme="dark"] .about-card{
   <div class="search-btn" onclick="toggleSearch()">🔍</div>
 </div>
 
-<!-- ✅✅✅ ДОБАВИЛ: Backdrop + Sheet меню -->
 <div class="menu-backdrop" id="menuBackdrop" onclick="closeTopMenu()"></div>
 
 <div class="menu-sheet" id="menuSheet">
@@ -634,7 +651,6 @@ body[data-theme="dark"] .about-card{
   </div>
 
   <div class="menu-list">
-    <!-- ✅✅✅ Оставить отзыв: встроил Яндекс iframe внутрь пункта -->
     <div class="menu-item" onclick="toggleReviewWidget()" role="button">
       <div class="menu-left">
         <div class="menu-ic">⭐</div>
@@ -646,7 +662,6 @@ body[data-theme="dark"] .about-card{
       <div class="menu-right">›</div>
     </div>
 
-    <!-- ✅✅✅ контейнер для iframe -->
     <div id="reviewWidgetWrap" style="display:none; padding:6px 4px 10px;">
       <div style="border:1px solid var(--stroke); border-radius:16px; overflow:hidden; background:#fff; padding:10px; display:flex; justify-content:center;">
         <iframe
@@ -681,7 +696,6 @@ body[data-theme="dark"] .about-card{
     <a class="menu-item" href="#" onclick="openInstagram(event)">
       <div class="menu-left">
         <div class="menu-ic" aria-hidden="true">
-          <!-- Instagram svg -->
           <svg width="18" height="18" viewBox="0 0 24 24" style="display:block;">
             <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm-5 4.3A5.7 5.7 0 1 1 6.3 14 5.7 5.7 0 0 1 12 8.3zm0 2A3.7 3.7 0 1 0 15.7 14 3.7 3.7 0 0 0 12 10.3zM18 6.7a1 1 0 1 1-1 1 1 1 0 0 1 1-1z"/>
           </svg>
@@ -718,7 +732,6 @@ body[data-theme="dark"] .about-card{
   </div>
 </div>
 
-<!-- ✅✅✅ ДОБАВИЛ: модалка О НАС -->
 <div class="about-modal" id="aboutModal" onclick="aboutBackdropClick(event)">
   <div class="about-card">
     <div class="about-head">
@@ -784,7 +797,38 @@ body[data-theme="dark"] .about-card{
 </div>
 
 <script>
+/* ✅✅✅ ВАЖНО: раскрываем WebApp и синхроним высоту */
 Telegram.WebApp.ready();
+
+try{
+  Telegram.WebApp.expand();                 // <- главное: убирает “50%”
+  Telegram.WebApp.disableVerticalSwipes?.(); // опционально: меньше случайных свайпов
+} catch(_){}
+
+function setAppHeight(){
+  const h = (window.Telegram && Telegram.WebApp && Telegram.WebApp.viewportHeight)
+    ? Telegram.WebApp.viewportHeight
+    : window.innerHeight;
+
+  document.documentElement.style.setProperty('--app-h', h + 'px');
+
+  // Telegram vars (на некоторых версиях доступны)
+  try{
+    if(window.Telegram && Telegram.WebApp){
+      if (Telegram.WebApp.viewportHeight) {
+        document.documentElement.style.setProperty('--tg-viewport-height', Telegram.WebApp.viewportHeight + 'px');
+      }
+      if (Telegram.WebApp.safeAreaInset && Telegram.WebApp.safeAreaInset.bottom != null){
+        document.documentElement.style.setProperty('--tg-safe-area-inset-bottom', Telegram.WebApp.safeAreaInset.bottom + 'px');
+      }
+    }
+  }catch(_){}
+}
+setAppHeight();
+window.addEventListener('resize', setAppHeight);
+try{
+  Telegram.WebApp.onEvent('viewportChanged', setAppHeight);
+} catch(_){}
 
 function callPhone(e){
   try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
@@ -798,7 +842,7 @@ function callPhone(e){
   try{ window.location.href = tel; }catch(_){}
 }
 
-/* ✅✅✅ ДОБАВИЛ: меню функции */
+/* меню функции */
 function openTopMenu(){
   try{ closeSearch(); }catch(_){}
   document.getElementById('menuBackdrop').classList.add('show');
@@ -807,20 +851,15 @@ function openTopMenu(){
 function closeTopMenu(){
   document.getElementById('menuBackdrop').classList.remove('show');
   document.getElementById('menuSheet').classList.remove('show');
-  // не трогаем виджет, пусть останется открытым/закрытым как было
 }
 
-/* ✅✅✅ ДОБАВИЛ: виджет отзывов (iframe) */
+/* виджет отзывов */
 function toggleReviewWidget(){
   const w = document.getElementById('reviewWidgetWrap');
   w.style.display = (w.style.display === 'none' || !w.style.display) ? 'block' : 'none';
 }
-
-/* ✅✅✅ ДОБАВИЛ: открыть отзывы отдельной ссылкой (если iframe не работает в Telegram) */
 function openYandexReviews(e){
   try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
-  // У тебя есть виджет-ссылка. В Telegram iframe может блокироваться,
-  // поэтому открываем ту же ссылку в браузере.
   const url = "https://yandex.ru/sprav/widget/rating-badge/11046753996?type=rating";
   try{
     if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === "function"){
@@ -831,7 +870,7 @@ function openYandexReviews(e){
   window.open(url, "_blank");
 }
 
-/* ✅✅✅ ДОБАВИЛ: Instagram */
+/* Instagram */
 function openInstagram(e){
   try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
   const url = "https://www.instagram.com/KADIMA.UZ/";
@@ -845,7 +884,7 @@ function openInstagram(e){
   window.open(url, "_blank");
 }
 
-/* ✅✅✅ ДОБАВИЛ: тема (сохранение) */
+/* тема (сохранение) */
 function applyTheme(theme){
   document.body.setAttribute('data-theme', theme);
   localStorage.setItem('kadima_theme', theme);
@@ -866,7 +905,7 @@ function toggleThemeFromMenu(){
   applyTheme(next);
 }
 
-/* ✅✅✅ ДОБАВИЛ: О нас */
+/* О нас */
 function openAbout(){
   closeTopMenu();
   document.getElementById('aboutModal').classList.add('show');
@@ -883,7 +922,6 @@ function aboutBackdropClick(e){
   if(saved === 'dark' || saved === 'light'){
     applyTheme(saved);
   }else{
-    // если Telegram отдаёт схему — используем её
     const tgTheme = (window.Telegram && Telegram.WebApp && Telegram.WebApp.colorScheme) ? Telegram.WebApp.colorScheme : 'light';
     applyTheme(tgTheme === 'dark' ? 'dark' : 'light');
   }
@@ -955,14 +993,10 @@ const MENU = {
   ]
 };
 
-/* ✅ Популярное (по id) */
 const POPULAR = ['plov05','manty1','shurpa','tsezar'];
 
-/* ✅ индекс для быстрого поиска */
 const ITEM_INDEX = {};
-for (const c in MENU){
-  MENU[c].forEach(it => { ITEM_INDEX[it.id] = it; });
-}
+for (const c in MENU){ MENU[c].forEach(it => { ITEM_INDEX[it.id] = it; }); }
 
 function nameOf(id){
   const it = ITEM_INDEX[id];
@@ -1042,7 +1076,6 @@ function openCart(){
   catch(_){ window.location.hash = '#cartBox'; }
 }
 
-/* ✅✅✅ ИЗМЕНИЛ: популярное теперь с +- и работает в корзину */
 function renderPopular(){
   popularRow.innerHTML = '';
   POPULAR.forEach((id)=>{
@@ -1067,18 +1100,14 @@ function renderPopular(){
   });
 }
 
-/* клик по карточке (НЕ по кнопкам) = добавить +1 */
 function onPopularCardClick(e,id){
-  // если нажали на кнопку внутри - не добавляем повторно
   if(e && e.target && (e.target.closest && e.target.closest('button'))) return;
   chg(id, 1);
-  // обновим счетчик популярного (на случай если карточка не перерисована)
   const pc = document.getElementById('pc_'+id);
   if(pc) pc.innerText = cart[id] || 0;
   if(isSearchOpen()) closeSearch();
 }
 
-/* кнопки +/- в популярном */
 function popChg(e,id,delta){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   chg(id, delta);
@@ -1141,7 +1170,6 @@ function renderProducts(){
   });
 }
 
-/* ✅✅✅ ДОБАВИЛ: синхронизация счетчиков в "Популярное" при любом изменении */
 function syncPopularCounters(){
   POPULAR.forEach((id)=>{
     const el = document.getElementById('pc_'+id);
