@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>KADIMA</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
 
@@ -25,14 +25,13 @@
   --r-md:22px;
   --r-pill:28px;
 
-  /* ✅ Telegram viewport vars */
   --app-h: 100vh;
-
-  /* ✅✅✅ ВАЖНО: высота нижней sticky панели (будет считаться JS) */
   --sticky-h: 92px;
+
+  /* ✅ фикс: безопасный отступ под кнопку "Оформить заказ" */
+  --order-safe: 18px;
 }
 
-/* тёмная тема */
 body[data-theme="dark"]{
   --bg:#121212;
   --stroke: rgba(255,255,255,.14);
@@ -45,11 +44,7 @@ body[data-theme="dark"]{
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-html,body{
-  height:100%;
-  margin:0;
-  padding:0;
-}
+html,body{height:100%;margin:0;padding:0;}
 
 body{
   font-family:'Montserrat',sans-serif;
@@ -64,14 +59,14 @@ body{
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
 
-  /* ✅✅✅ запас снизу = sticky панель + safe area */
-  padding-bottom: calc(var(--sticky-h, 92px) + 18px + var(--tg-safe-area-inset-bottom, 0px));
+  /* ✅✅✅ ВАЖНО: общий запас снизу = sticky панель + safe area + место под кнопку */
+  padding-bottom: calc(var(--sticky-h, 92px) + var(--order-safe, 18px) + 18px + var(--tg-safe-area-inset-bottom, 0px));
 }
 
 body[data-theme="dark"]{ color:#f1f1f1; }
 
 .header{
-  padding:16px 12px 26px;
+  padding:14px 12px 24px;
   background:linear-gradient(135deg,var(--terracotta),var(--gold));
   color:white;
   box-shadow:0 6px 18px rgba(120,70,20,.25);
@@ -81,17 +76,17 @@ body[data-theme="dark"]{ color:#f1f1f1; }
   position:relative;
   text-align:center;
 }
-.header img{position:absolute;left:12px;width:110px;}
+.header img{position:absolute;left:10px;width:96px;max-width:28vw;}
 
-.brand-title{font-family:'Lobster',cursive;font-size:36px;}
-.brand-sub{font-weight:800;font-size:15px;}
+.brand-title{font-family:'Lobster',cursive;font-size:34px;line-height:1;}
+.brand-sub{font-weight:800;font-size:14px;margin-top:2px;}
 
 .brand-phone{position:relative; z-index:50; pointer-events:auto;}
 .brand-phone a{
   color:white;
   text-decoration:none;
-  font-size:15px;
-  font-weight:700;
+  font-size:14px;
+  font-weight:800;
   position:relative;
   z-index:51;
   pointer-events:auto;
@@ -100,18 +95,11 @@ body[data-theme="dark"]{ color:#f1f1f1; }
 
 /* бургер */
 .menu-btn{
-  position:absolute;
-  right:14px;
-  top:12px;
-  width:42px;
-  height:42px;
+  position:absolute; right:12px; top:10px;
+  width:40px; height:40px;
   border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  z-index:80;
-
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; z-index:80;
   background:rgba(255,255,255,.92);
   border:1px solid rgba(255,255,255,.55);
   box-shadow: inset 0 0 0 2px rgba(255,255,255,.55), 0 8px 18px rgba(0,0,0,.10);
@@ -130,20 +118,11 @@ body[data-theme="dark"]{ color:#f1f1f1; }
 
 /* поиск */
 .search-btn{
-  position:absolute;
-  right:14px;
-  bottom:10px;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  z-index:60;
-
+  position:absolute; right:12px; bottom:9px;
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700;
+  cursor:pointer; z-index:60;
   color:#333;
   background:#fffdf9;
   border:1px solid var(--stroke);
@@ -154,28 +133,25 @@ body[data-theme="dark"]{ color:#f1f1f1; }
 
 .langs,.types,.payments{
   display:flex;
-  gap:12px;
-  padding:12px;
+  gap:10px;
+  padding:10px 12px;
   justify-content:center;
+  flex-wrap:wrap; /* ✅ для телефона */
 }
 
 .btn{
-  padding:12px 20px;
+  padding:12px 16px;
   border-radius:var(--r-pill);
-  font-weight:700;
+  font-weight:800;
   min-width:120px;
   text-align:center;
   cursor:pointer;
   transition:.15s;
-
   border:1px solid var(--stroke);
   background:#fffdf9;
   box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
 }
-body[data-theme="dark"] .btn{
-  background:rgba(255,255,255,.06);
-  color:#f1f1f1;
-}
+body[data-theme="dark"] .btn{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .btn:active{transform:scale(.98);}
 .btn.active{
   background:linear-gradient(135deg,var(--terracotta),var(--gold));
@@ -188,20 +164,16 @@ body[data-theme="dark"] .btn{
   margin:8px auto;
   display:block;
   padding:14px;
-  width:85%;
+  width:min(92%, 520px); /* ✅ адаптация под телефон */
   border-radius:var(--r-md);
   font-size:15px;
-
   border:1px solid var(--stroke);
   background:#fffdf9;
   box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
   outline:none;
   transition:.15s;
 }
-body[data-theme="dark"] .input{
-  background:rgba(255,255,255,.06);
-  color:#f1f1f1;
-}
+body[data-theme="dark"] .input{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .input:focus{
   border-color: var(--stroke-strong);
   box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);
@@ -209,58 +181,56 @@ body[data-theme="dark"] .input{
 
 .categories{
   display:flex;
-  gap:12px;
-  padding:14px;
+  gap:10px;
+  padding:12px;
   overflow-x:auto;
   scroll-behavior:smooth;
 }
 
 .products{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:16px;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:12px;
   padding:12px;
+}
+@media (max-width:360px){
+  .products{grid-template-columns:1fr;} /* ✅ очень маленькие телефоны */
 }
 
 .card{
   border-radius:var(--r-lg);
-  padding:12px;
+  padding:10px;
   text-align:center;
   background:#fffdf9;
   border:1px solid var(--stroke);
   box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
   transition:.15s;
 }
-body[data-theme="dark"] .card{
-  background:rgba(255,255,255,.06);
-  color:#f1f1f1;
-}
+body[data-theme="dark"] .card{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .card:active{transform:scale(.99);}
 
-/* ✅ фотографии блюд ближе: меньше высота зоны изображения + меньше отступ снизу */
+/* фото ближе */
 .img{
-  height:124px;              /* было 140 */
+  height:120px;
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-bottom:2px;         /* было 6 */
+  margin-bottom:2px;
 }
 .img img{
-  max-width:132px;           /* было 125 */
-  max-height:132px;          /* было 125 */
-  width:auto;
-  height:auto;
+  max-width:132px;
+  max-height:132px;
+  width:auto;height:auto;
   object-fit:contain;
-  opacity:1;
   transform:scale(1.06);
   transition:.15s;
 }
 .card:active .img img{transform:scale(1.12);}
 
 .item-name{
-  margin-top:0;              /* было 2 */
+  margin-top:0;
   padding:0 6px;
-  font-weight:800;
+  font-weight:900;
   line-height:1.15;
   min-height:34px;
   display:flex;
@@ -269,20 +239,18 @@ body[data-theme="dark"] .card{
   word-break:break-word;
 }
 
-.price{font-weight:800;color:var(--meat);margin-top:6px;}
-.price small{font-weight:700;opacity:.75;margin-left:4px;}
+.price{font-weight:900;color:var(--meat);margin-top:6px;}
+.price small{font-weight:800;opacity:.75;margin-left:4px;}
 
 .counter{display:flex;justify-content:center;gap:10px;margin-top:8px;align-items:center;}
 .counter button{
-  width:32px;
-  height:32px;
-  border-radius:50%;
+  width:32px;height:32px;border-radius:50%;
   cursor:pointer;
-
   border:1px solid rgba(255,255,255,.6);
   background:var(--green);
   color:white;
   font-size:16px;
+  font-weight:900;
   box-shadow:0 6px 14px var(--shadow);
   transition:.15s;
 }
@@ -291,23 +259,17 @@ body[data-theme="dark"] .card{
 .cart{
   background:#fffdf9;
   margin:12px;
-  padding:16px;
+  padding:14px;
   border-radius:var(--r-lg);
   border:1px solid var(--stroke);
   box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
-
-  scroll-margin-bottom: calc(var(--sticky-h, 92px) + 22px);
+  scroll-margin-bottom: calc(var(--sticky-h, 92px) + 26px);
 }
-body[data-theme="dark"] .cart{
-  background:rgba(255,255,255,.06);
-  color:#f1f1f1;
-}
+body[data-theme="dark"] .cart{background:rgba(255,255,255,.06); color:#f1f1f1;}
 
 textarea.input{height:90px;}
 
-/* ✅✅✅ FIX: "Оформить заказ" больше НЕ перекрывает оплату:
-   делаем кнопку НЕ sticky, а обычной, но оставляем её видимой (за счёт нижнего padding у body).
-   Это самый надёжный способ, чтобы кнопка никогда не наезжала на payments. */
+/* ✅✅✅ КНОПКА "Оформить заказ" — закрепляем над корзиной, но выше sticky-панели */
 .order-btn{
   width:100%;
   padding:18px;
@@ -316,37 +278,39 @@ textarea.input{height:90px;}
   cursor:pointer;
   color:white;
   font-size:17px;
-  font-weight:800;
+  font-weight:900;
 
   border:1px solid rgba(255,255,255,.55);
   background:linear-gradient(135deg,var(--green),#2e7d32);
   box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 10px 22px rgba(31,77,58,.18);
   transition:.15s;
 
-  position: relative;   /* было sticky */
-  bottom: auto;         /* было calc(...) */
-  z-index: 10;
+  position: sticky;
+  bottom: calc(var(--sticky-h, 92px) + 14px + var(--tg-safe-area-inset-bottom, 0px));
+  z-index: 1200; /* ✅ выше корзины и всего контента */
 }
 .order-btn:active{transform:scale(.99);}
 
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
+/* ✅ чтобы элементы корзины не попадали под кнопку */
+.cart .payments{padding-bottom:8px;}
+.cart textarea{margin-bottom:8px;}
+
+/* popup */
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;z-index:2000;}
 .popup.show{opacity:1;pointer-events:auto;}
 .popup-box{
   background:white;
-  padding:26px;
+  padding:24px;
   border-radius:var(--r-lg);
   text-align:center;
-  font-weight:700;
+  font-weight:800;
   border:1px solid var(--stroke);
   box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px rgba(0,0,0,.10);
 }
-body[data-theme="dark"] .popup-box{
-  background:#1c1c1c;
-  color:#f1f1f1;
-}
+body[data-theme="dark"] .popup-box{background:#1c1c1c;color:#f1f1f1;}
 
 .search-wrap{
-  width:85%;
+  width:min(92%, 520px);
   margin:8px auto;
   position:relative;
   display:none;
@@ -359,14 +323,9 @@ body[data-theme="dark"] .popup-box{
   right:10px;
   top:50%;
   transform:translateY(-50%);
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
   cursor:pointer;
-
   border:1px solid var(--stroke);
   background:#fffdf9;
   box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
@@ -376,9 +335,9 @@ body[data-theme="dark"] .search-clear{background:rgba(255,255,255,.06); color:#f
 .search-clear:active{transform:translateY(-50%) scale(.96);}
 
 .search-title{
-  width:85%;
+  width:min(92%, 520px);
   margin:10px auto 0;
-  font-weight:800;
+  font-weight:900;
   opacity:.9;
   display:none;
   z-index:70;
@@ -400,7 +359,7 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
   box-shadow: inset 0 0 0 2px var(--inner), 0 6px 14px var(--shadow);
   border-radius:999px;
   padding:10px 14px;
-  font-weight:800;
+  font-weight:900;
   cursor:pointer;
   white-space:nowrap;
   transition:.15s;
@@ -408,11 +367,12 @@ mark{background:rgba(212,160,23,.25);padding:0 .12em;border-radius:6px;}
 body[data-theme="dark"] .qbtn{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .qbtn:active{transform:scale(.98);}
 
+/* популярное */
 .popular-wrap{width:100%;padding:4px 12px 6px;}
 .popular-title{width:100%;font-weight:900;padding:8px 2px 10px;display:flex;align-items:center;gap:8px;}
 .popular-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;}
 .pop-card{
-  min-width:170px; /* немного шире */
+  min-width:170px;
   border-radius:var(--r-lg);
   padding:10px;
   background:#fffdf9;
@@ -424,10 +384,8 @@ body[data-theme="dark"] .qbtn{background:rgba(255,255,255,.06); color:#f1f1f1;}
 }
 body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .pop-card:active{transform:scale(.99);}
-
-/* ✅ Увеличили в высоту иконки/фото "Популярное" */
 .pop-img{
-  height:102px;       /* было 74 */
+  height:110px; /* ✅ ещё выше для телефона */
   border-radius:18px;
   overflow:hidden;
   display:flex;
@@ -436,7 +394,6 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
   background:rgba(199,107,47,.08);
 }
 .pop-img img{width:100%;height:100%;object-fit:cover;}
-
 .pop-name{font-weight:900;margin-top:8px;}
 .pop-price{font-weight:900;color:var(--meat);margin-top:4px;}
 .pop-badge{position:absolute;left:10px;top:10px;font-size:18px;pointer-events:none;}
@@ -449,11 +406,8 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
   margin-top:8px;
 }
 .pop-counter button{
-  width:30px;
-  height:30px;
-  border-radius:50%;
+  width:30px;height:30px;border-radius:50%;
   cursor:pointer;
-
   border:1px solid rgba(255,255,255,.6);
   background:var(--green);
   color:#fff;
@@ -465,7 +419,7 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
 .pop-counter button:active{transform:scale(.96);}
 .pop-counter span{font-weight:900; min-width:18px; text-align:center;}
 
-/* нижняя панель */
+/* ✅✅✅ нижняя панель (корзина) */
 .sticky-checkout{
   position:fixed;
   left:0; right:0; bottom:0;
@@ -510,120 +464,46 @@ body[data-theme="dark"] .sticky-inner{background:rgba(255,255,255,.06);}
 }
 .sticky-btn:active{transform:scale(.99);}
 
-@media (hover:hover){
-  .btn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
-  .card:hover{transform:translateY(-2px); box-shadow: inset 0 0 0 2px var(--inner), 0 12px 26px rgba(120,70,20,.16);}
-  .qbtn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
-  .search-btn:hover{box-shadow: inset 0 0 0 2px var(--inner), 0 10px 22px var(--shadow-strong);}
-  .sticky-btn:hover{box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 14px 28px rgba(31,77,58,.22);}
-  .pop-card:hover{transform:translateY(-2px);}
-}
-
-/* меню sheet */
-.menu-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.38);
-  opacity:0;
-  pointer-events:none;
-  transition:.18s;
-  z-index:1000;
-}
+/* меню sheet / about (без изменений по логике) */
+.menu-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.38);opacity:0;pointer-events:none;transition:.18s;z-index:1000;}
 .menu-backdrop.show{opacity:1;pointer-events:auto;}
-
 .menu-sheet{
-  position:fixed;
-  left:0; right:0;
-  bottom:-100%;
+  position:fixed;left:0; right:0;bottom:-100%;
   background:#fffdf9;
-  border-top-left-radius:22px;
-  border-top-right-radius:22px;
+  border-top-left-radius:22px;border-top-right-radius:22px;
   border:1px solid var(--stroke);
   box-shadow:0 18px 40px rgba(0,0,0,.18);
-  transition:.22s;
-  z-index:1010;
+  transition:.22s;z-index:1010;
   padding:10px 12px 14px;
   padding-bottom: calc(14px + var(--tg-safe-area-inset-bottom, 0px));
 }
-body[data-theme="dark"] .menu-sheet{
-  background:#1c1c1c;
-  border-color:rgba(255,255,255,.14);
-}
+body[data-theme="dark"] .menu-sheet{background:#1c1c1c;border-color:rgba(255,255,255,.14);}
 .menu-sheet.show{bottom:0;}
-.menu-handle{
-  width:44px;height:5px;border-radius:999px;
-  background:rgba(0,0,0,.18);
-  margin:6px auto 10px;
-}
+.menu-handle{width:44px;height:5px;border-radius:999px;background:rgba(0,0,0,.18);margin:6px auto 10px;}
 body[data-theme="dark"] .menu-handle{background:rgba(255,255,255,.18);}
-.menu-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:2px 4px 10px;
-}
+.menu-head{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px;}
 .menu-head b{font-size:16px;}
-.menu-close{
-  width:38px;height:38px;border:none;border-radius:12px;
-  background:transparent;
-  cursor:pointer;
-  font-size:22px;
-  line-height:1;
-  color:#777;
-}
+.menu-close{width:38px;height:38px;border:none;border-radius:12px;background:transparent;cursor:pointer;font-size:22px;line-height:1;color:#777;}
 body[data-theme="dark"] .menu-close{color:#bbb;}
-
 .menu-list{display:flex;flex-direction:column;gap:8px;}
 .menu-item{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:12px 12px;
-  border-radius:16px;
-  border:1px solid var(--stroke);
-  background:rgba(0,0,0,.03);
-  cursor:pointer;
-  text-decoration:none;
-  color:#2b2b2b;
+  padding:12px 12px;border-radius:16px;border:1px solid var(--stroke);
+  background:rgba(0,0,0,.03);cursor:pointer;text-decoration:none;color:#2b2b2b;
 }
-body[data-theme="dark"] .menu-item{
-  border-color:rgba(255,255,255,.14);
-  background:rgba(255,255,255,.06);
-  color:#f1f1f1;
-}
+body[data-theme="dark"] .menu-item{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#f1f1f1;}
 .menu-left{display:flex;align-items:center;gap:10px;min-width:0;}
-.menu-ic{
-  width:30px;height:30px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.06);
-  flex:0 0 auto;
-}
+.menu-ic{width:30px;height:30px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);flex:0 0 auto;}
 body[data-theme="dark"] .menu-ic{background:rgba(255,255,255,.06);}
 .menu-txt{display:flex;flex-direction:column;min-width:0;}
 .menu-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .menu-sub{font-size:12px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
 .menu-right{opacity:.65;font-weight:900;}
 
-/* модалка О нас */
-.about-modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.40);
-  display:none;
-  z-index:1100;
-  padding:18px 14px;
-}
+.about-modal{position:fixed;inset:0;background:rgba(0,0,0,.40);display:none;z-index:1100;padding:18px 14px;}
 .about-modal.show{display:block;}
-.about-card{
-  max-width:680px;
-  margin:0 auto;
-  background:#fffdf9;
-  border:1px solid var(--stroke);
-  border-radius:22px;
-  box-shadow:0 18px 40px rgba(0,0,0,.18);
-  padding:14px 14px 12px;
-}
-body[data-theme="dark"] .about-card{
-  background:#1c1c1c;
-  border-color:rgba(255,255,255,.14);
-  color:#f1f1f1;
-}
+.about-card{max-width:680px;margin:0 auto;background:#fffdf9;border:1px solid var(--stroke);border-radius:22px;box-shadow:0 18px 40px rgba(0,0,0,.18);padding:14px 14px 12px;}
+body[data-theme="dark"] .about-card{background:#1c1c1c;border-color:rgba(255,255,255,.14);color:#f1f1f1;}
 .about-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
 .about-head b{font-size:16px;}
 .about-body{font-size:14px;line-height:1.45;}
@@ -796,6 +676,7 @@ body[data-theme="dark"] .about-card{
 
 <div class="popup" id="popup"><div class="popup-box">✅ Заказ принят!</div></div>
 
+<!-- ✅✅✅ sticky корзина (нижняя панель) -->
 <div class="sticky-checkout" id="stickyCheckout">
   <div class="sticky-inner">
     <div class="sticky-sum">
@@ -813,7 +694,7 @@ try{
   Telegram.WebApp.disableVerticalSwipes?.();
 } catch(_){}
 
-/* ✅✅✅ высота приложения */
+/* высота приложения */
 function setAppHeight(){
   const h = (window.Telegram && Telegram.WebApp && Telegram.WebApp.viewportHeight)
     ? Telegram.WebApp.viewportHeight
@@ -833,7 +714,7 @@ function setAppHeight(){
   }catch(_){}
 }
 
-/* ✅ высота нижней панели */
+/* ✅ фикс: измеряем высоту sticky корзины */
 function setStickyHeight(){
   const el = document.getElementById('stickyCheckout');
   if(!el) return;
@@ -841,9 +722,17 @@ function setStickyHeight(){
   document.documentElement.style.setProperty('--sticky-h', h + 'px');
 }
 
+/* ✅ фикс: делаем order-safe чуть больше, чтобы кнопка всегда была над корзиной */
+function setOrderSafe(){
+  // запас над корзиной (можно увеличить если нужно)
+  const extra = 18;
+  document.documentElement.style.setProperty('--order-safe', extra + 'px');
+}
+
 function refreshLayout(){
   setAppHeight();
   setStickyHeight();
+  setOrderSafe();
 }
 
 refreshLayout();
@@ -943,6 +832,42 @@ function aboutBackdropClick(e){
   }
 })();
 
+function isSearchOpen(){ return searchWrap.classList.contains('show'); }
+
+function toggleSearch(){
+  if(isSearchOpen()) closeSearch();
+  else openSearch();
+}
+function openSearch(){
+  searchWrap.classList.add('show');
+  searchTitle.classList.add('show');
+  cats.style.display = 'none';
+  quickFilters.style.display = 'none';
+  popularWrap.style.display = 'none';
+  searchInput.value = '';
+  searchInput.focus();
+  searchProducts();
+}
+function closeSearch(){
+  searchWrap.classList.remove('show');
+  searchTitle.classList.remove('show');
+  cats.style.display = '';
+  quickFilters.style.display = '';
+  popularWrap.style.display = '';
+  searchInput.value = '';
+  renderProducts();
+}
+function clearSearch(){ closeSearch(); }
+
+document.addEventListener('click', (e)=>{
+  if(!isSearchOpen()) return;
+  const t = e.target;
+  const insideSearch = searchWrap.contains(t) || searchTitle.contains(t);
+  const onBtn = t.closest && t.closest('.search-btn');
+  if(!insideSearch && !onBtn) closeSearch();
+}, true);
+
+/* ===== ДАННЫЕ ===== */
 const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
 const tg_username = tgUser.username || "";
 const tg_first_name = tgUser.first_name || "";
@@ -1006,10 +931,8 @@ const MENU = {
     {id:'tea', p:5000, img:'images/tea.png', n:{ru:'Чай зелёный / чёрный', uz:'Choy (yashil / qora)', en:'Tea (green / black)'}},
     {id:'tea_lemon', p:15000, img:'images/tea_lemon.png', n:{ru:'Чай с лимоном', uz:'Limonli choy', en:'Tea with lemon'}},
     {id:'coffee', p:10000, img:'images/coffee.png', n:{ru:'Кофе растворимый чёрный', uz:'Qora kofe (eritma)', en:'Instant black coffee'}},
-
-    /* ✅ добавлено */
     {id:'simma05', p:3000, img:'images/simma05.jpg', n:{ru:'Минеральная вода SIMMA 0.5L', uz:'SIMMA mineral suv 0.5L', en:'SIMMA mineral water 0.5L'}},
-    {id:'simma1',  p:5000, img:'images/simma1.jpg',  n:{ru:'Минеральная вода SIMMA 1L',   uz:'SIMMA mineral suv 1L',   en:'SIMMA mineral water 1L'}},
+    {id:'simma1', p:5000, img:'images/simma1.jpg', n:{ru:'Минеральная вода SIMMA 1L', uz:'SIMMA mineral suv 1L', en:'SIMMA mineral water 1L'}},
     {id:'simma_gas05', p:4000, img:'images/simma_gas05.jpg', n:{ru:'Газированная вода SIMMA 0.5L', uz:'SIMMA gazli suv 0.5L', en:'SIMMA sparkling water 0.5L'}}
   ]
 };
@@ -1091,7 +1014,9 @@ function applyLang(){
   updateTotal();
   updateTypeFields();
 
-  setTimeout(setStickyHeight, 50);
+  setTimeout(()=>{
+    setStickyHeight();
+  }, 50);
 }
 
 function openCart(){
@@ -1099,6 +1024,7 @@ function openCart(){
   catch(_){ window.location.hash = '#cartBox'; }
 }
 
+/* популярное */
 function renderPopular(){
   popularRow.innerHTML = '';
   POPULAR.forEach((id)=>{
@@ -1233,33 +1159,6 @@ function setPayment(p){
   payClick.classList.toggle('active',p==='click');
 }
 
-function isSearchOpen(){ return searchWrap.classList.contains('show'); }
-
-function toggleSearch(){
-  if(isSearchOpen()) closeSearch();
-  else openSearch();
-}
-function openSearch(){
-  searchWrap.classList.add('show');
-  searchTitle.classList.add('show');
-  cats.style.display = 'none';
-  quickFilters.style.display = 'none';
-  popularWrap.style.display = 'none';
-  searchInput.value = '';
-  searchInput.focus();
-  searchProducts();
-}
-function closeSearch(){
-  searchWrap.classList.remove('show');
-  searchTitle.classList.remove('show');
-  cats.style.display = '';
-  quickFilters.style.display = '';
-  popularWrap.style.display = '';
-  searchInput.value = '';
-  renderProducts();
-}
-function clearSearch(){ closeSearch(); }
-
 function onSearchKey(e){
   if(e.key === 'Enter') closeSearch();
 }
@@ -1290,14 +1189,6 @@ function searchProducts(){
     });
   }
 }
-
-document.addEventListener('click', (e)=>{
-  if(!isSearchOpen()) return;
-  const t = e.target;
-  const insideSearch = searchWrap.contains(t) || searchTitle.contains(t);
-  const onBtn = t.closest && t.closest('.search-btn');
-  if(!insideSearch && !onBtn) closeSearch();
-}, true);
 
 function genOrderId(){
   const d = new Date();
