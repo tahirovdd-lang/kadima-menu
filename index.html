@@ -64,7 +64,7 @@ body{
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
 
-  /* ✅✅✅ ВАЖНО: запас снизу = sticky панель + safe area */
+  /* ✅✅✅ запас снизу = sticky панель + safe area */
   padding-bottom: calc(var(--sticky-h, 92px) + 18px + var(--tg-safe-area-inset-bottom, 0px));
 }
 
@@ -237,27 +237,28 @@ body[data-theme="dark"] .card{
 }
 .card:active{transform:scale(.99);}
 
+/* ✅ фотографии блюд ближе: меньше высота зоны изображения + меньше отступ снизу */
 .img{
-  height:140px;
+  height:124px;              /* было 140 */
   display:flex;
   align-items:center;
   justify-content:center;
-  margin-bottom:6px;
+  margin-bottom:2px;         /* было 6 */
 }
 .img img{
-  max-width:125px;
-  max-height:125px;
+  max-width:132px;           /* было 125 */
+  max-height:132px;          /* было 125 */
   width:auto;
   height:auto;
   object-fit:contain;
   opacity:1;
-  transform:scale(1.05);
+  transform:scale(1.06);
   transition:.15s;
 }
 .card:active .img img{transform:scale(1.12);}
 
 .item-name{
-  margin-top:2px;
+  margin-top:0;              /* было 2 */
   padding:0 6px;
   font-weight:800;
   line-height:1.15;
@@ -295,7 +296,6 @@ body[data-theme="dark"] .card{
   border:1px solid var(--stroke);
   box-shadow: inset 0 0 0 2px var(--inner), 0 8px 18px rgba(120,70,20,.12);
 
-  /* ✅✅✅ ВАЖНО: если доскроллили к корзине — учитываем нижнюю панель */
   scroll-margin-bottom: calc(var(--sticky-h, 92px) + 22px);
 }
 body[data-theme="dark"] .cart{
@@ -305,7 +305,9 @@ body[data-theme="dark"] .cart{
 
 textarea.input{height:90px;}
 
-/* ✅✅✅ ВАЖНО: кнопка заказа всегда видна над sticky-панелью */
+/* ✅✅✅ FIX: "Оформить заказ" больше НЕ перекрывает оплату:
+   делаем кнопку НЕ sticky, а обычной, но оставляем её видимой (за счёт нижнего padding у body).
+   Это самый надёжный способ, чтобы кнопка никогда не наезжала на payments. */
 .order-btn{
   width:100%;
   padding:18px;
@@ -321,9 +323,9 @@ textarea.input{height:90px;}
   box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 10px 22px rgba(31,77,58,.18);
   transition:.15s;
 
-  position: sticky;
-  bottom: calc(var(--sticky-h, 92px) + 12px);
-  z-index: 40;
+  position: relative;   /* было sticky */
+  bottom: auto;         /* было calc(...) */
+  z-index: 10;
 }
 .order-btn:active{transform:scale(.99);}
 
@@ -410,7 +412,7 @@ body[data-theme="dark"] .qbtn{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .popular-title{width:100%;font-weight:900;padding:8px 2px 10px;display:flex;align-items:center;gap:8px;}
 .popular-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 10px;}
 .pop-card{
-  min-width:150px;
+  min-width:170px; /* немного шире */
   border-radius:var(--r-lg);
   padding:10px;
   background:#fffdf9;
@@ -422,8 +424,10 @@ body[data-theme="dark"] .qbtn{background:rgba(255,255,255,.06); color:#f1f1f1;}
 }
 body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f1;}
 .pop-card:active{transform:scale(.99);}
+
+/* ✅ Увеличили в высоту иконки/фото "Популярное" */
 .pop-img{
-  height:74px;
+  height:102px;       /* было 74 */
   border-radius:18px;
   overflow:hidden;
   display:flex;
@@ -432,6 +436,7 @@ body[data-theme="dark"] .pop-card{background:rgba(255,255,255,.06); color:#f1f1f
   background:rgba(199,107,47,.08);
 }
 .pop-img img{width:100%;height:100%;object-fit:cover;}
+
 .pop-name{font-weight:900;margin-top:8px;}
 .pop-price{font-weight:900;color:var(--meat);margin-top:4px;}
 .pop-badge{position:absolute;left:10px;top:10px;font-size:18px;pointer-events:none;}
@@ -780,10 +785,12 @@ body[data-theme="dark"] .about-card{
 <div class="cart" id="cartBox">
   <b id="cartTitle"></b>: <span id="total">0</span> сум
   <textarea id="comment" class="input"></textarea>
+
   <div class="payments">
     <button class="btn active" id="payCash" onclick="setPayment('cash')"></button>
     <button class="btn" id="payClick" onclick="setPayment('click')"></button>
   </div>
+
   <button class="order-btn" id="orderBtn" onclick="sendOrder()"></button>
 </div>
 
@@ -806,7 +813,7 @@ try{
   Telegram.WebApp.disableVerticalSwipes?.();
 } catch(_){}
 
-/* ✅✅✅ высота приложения (уже была) */
+/* ✅✅✅ высота приложения */
 function setAppHeight(){
   const h = (window.Telegram && Telegram.WebApp && Telegram.WebApp.viewportHeight)
     ? Telegram.WebApp.viewportHeight
@@ -826,7 +833,7 @@ function setAppHeight(){
   }catch(_){}
 }
 
-/* ✅✅✅ ВАЖНО: считаем реальную высоту нижней панели, чтобы она НЕ перекрывала кнопку */
+/* ✅ высота нижней панели */
 function setStickyHeight(){
   const el = document.getElementById('stickyCheckout');
   if(!el) return;
@@ -998,7 +1005,12 @@ const MENU = {
     {id:'chertoq15', p:8000, img:'images/chertoq15.png', n:{ru:'Вода газ / без газа Chertoq 1.5L', uz:'Chertoq suv 1.5L (gazli / gazsiz)', en:'Chertoq water 1.5L (sparkling / still)'}},
     {id:'tea', p:5000, img:'images/tea.png', n:{ru:'Чай зелёный / чёрный', uz:'Choy (yashil / qora)', en:'Tea (green / black)'}},
     {id:'tea_lemon', p:15000, img:'images/tea_lemon.png', n:{ru:'Чай с лимоном', uz:'Limonli choy', en:'Tea with lemon'}},
-    {id:'coffee', p:10000, img:'images/coffee.png', n:{ru:'Кофе растворимый чёрный', uz:'Qora kofe (eritma)', en:'Instant black coffee'}}
+    {id:'coffee', p:10000, img:'images/coffee.png', n:{ru:'Кофе растворимый чёрный', uz:'Qora kofe (eritma)', en:'Instant black coffee'}},
+
+    /* ✅ добавлено */
+    {id:'simma05', p:3000, img:'images/simma05.jpg', n:{ru:'Минеральная вода SIMMA 0.5L', uz:'SIMMA mineral suv 0.5L', en:'SIMMA mineral water 0.5L'}},
+    {id:'simma1',  p:5000, img:'images/simma1.jpg',  n:{ru:'Минеральная вода SIMMA 1L',   uz:'SIMMA mineral suv 1L',   en:'SIMMA mineral water 1L'}},
+    {id:'simma_gas05', p:4000, img:'images/simma_gas05.jpg', n:{ru:'Газированная вода SIMMA 0.5L', uz:'SIMMA gazli suv 0.5L', en:'SIMMA sparkling water 0.5L'}}
   ]
 };
 
@@ -1079,7 +1091,6 @@ function applyLang(){
   updateTotal();
   updateTypeFields();
 
-  // ✅ на всякий случай обновим высоту sticky после перерендера
   setTimeout(setStickyHeight, 50);
 }
 
